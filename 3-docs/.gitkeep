@@ -29,6 +29,6 @@ Thumbs.db
 
 
 # To make sure 'processed' folder is always in Git (even if it's empty)
-!*/.gitkeep
+!data/processed/.gitkeep
 
 # Use ! to force specific files to backup
