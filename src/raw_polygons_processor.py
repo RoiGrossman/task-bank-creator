@@ -8,14 +8,14 @@ import uuid
 import json
 import os
 
-# --- הגדרת סביבת עבודה ---
+# Define base dir
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR / "src"))
 
-# ייבוא מהחבילה המקומית
+# Import from local package
 from xml_exporter import export_to_xml
 
-# נתיבים דינמיים
+# Dynamic paths
 DATA_RAW = BASE_DIR / "2-data" / "raw"
 DATA_EXPORT = BASE_DIR / "1-raw_OSM_exports"
 OUTPUT_DIR = BASE_DIR / "2-data" / "processed" / "output_targets"
@@ -96,7 +96,7 @@ def save_execution_summary_to_file(gdf, shp_path, summary_path, log_lines, sampl
 def main():
     log_lines = [f"Execution started at: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"]
     
-    # הגדרת קובץ קלט (דוגמה: quarry)
+    # Define input file
     input_file = BASE_DIR / "2-data" / "raw" / "export.geojson"
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     
@@ -138,7 +138,7 @@ def main():
     summary_path = OUTPUT_DIR / 'summary.txt'
     save_execution_summary_to_file(gdf, str(output_shp), str(summary_path), log_lines, sample_rows_to_show)
     
-    export_to_xml(gdf, str(OUTPUT_DIR / 'tasks_baseline.xml'))
+    export_to_xml(gdf, str(OUTPUT_DIR / 'prioritized_targets.xml'))
 
     print(f"Columns in GDF: {gdf.columns.tolist()}")
     
@@ -157,7 +157,7 @@ def main():
     else:
         print("ERROR: Column 'Priority' not found in data. Available columns:", gdf.columns.tolist())
 
-    # פתיחה ב-Notepad
+    # Open file
     subprocess.Popen(['notepad.exe', str(summary_path)])
 
 if __name__ == "__main__":

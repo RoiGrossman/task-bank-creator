@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<message xmlns="http://scc/xml/schemas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://scc/xml/schemas V:sccXSD_Message.xsd">
+    <iccHeader>
+        <messageType>MissionRequirements</messageType>
+        <originator>foo</originator>
+        <originatorAddress>foo-bar</originatorAddress>
+        <recipient>bar-foo</recipient>
+        <creationTime>1776670973</creationTime>
+        <creationTimeString>2026-04-20T10:42:53.300</creationTimeString>
+    </iccHeader>
+    <missionRequirementsData>
+        <satellite>OF7</satellite>
+        <scowId>Foo#10225#BAR#-#1</scowId>
+        <planRequirementId>1693___1720</planRequirementId>
+        <updatedRequirementList>false</updatedRequirementList>
+        <requirementList>
+<requirement>
+    <palRequirementId>4640286</palRequirementId>
+    <requirementName>TestReq</requirementName>
+    <type>Standing</type>
+    <extraRequirement>false</extraRequirement>
+    <deleted>false</deleted>
+    <priority>5</priority>
+    <unPlannedElsewhere>false</unPlannedElsewhere>
+    <plannedElsewhere>false</plannedElsewhere>
+    <disseminationPriority>7</disseminationPriority>
+    <worstAcceptableResolution>1</worstAcceptableResolution>
+    <cloudCoverageForcast>0</cloudCoverageForcast>
+    <percentUnusableData>20</percentUnusableData>
+    <displayText>No Comments</displayText>
+    <targetImageData>
+        <targetCenterHeight>500</targetCenterHeight>
+        <polygonBoundary>
+            <geographicPoint>
+                <long>1.23456</long>
+                <lat>1.23456</lat>
+                <heightUnknown/>
+            </geographicPoint>
+            <geographicPoint>
+                <long>-1.23456</long>
+                <lat>-1.23456</lat>
+                <heightUnknown/>
+            </geographicPoint>
+        </polygonBoundary>
+        <nominalTargetGroundContrast/>
+        <niirsNotApplicable/>
+    </targetImageData>
+    <desirability>7</desirability>
+    <anchor>true</anchor>
+    <monoImaging/>
+    <coverageConstraints>
+        <oneScan>true</oneScan>
+        <oneScow>false</oneScow>
+    </coverageConstraints>
+    <timeConstraints>
+        <imagingDates>
+            <dateRange>
+                <start>2011-06-05T00:00:00.000</start>
+                <end>2013-01-01T01:00:00.000</end>
+            </dateRange>
+        </imagingDates>
+        <noImagingTimes/>
+    </timeConstraints>
+</requirement>
+        </requirementList>
+    </missionRequirementsData>
+</message>

@@ -3,74 +3,105 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 
-# הגדרת נתיב השורש (התיקייה שמעל src)
 BASE_DIR = Path(__file__).resolve().parent.parent
-# מוודאים ש-BASE_DIR נמצא בנתיב החיפוש
 if str(BASE_DIR) not in sys.path:
     sys.path.append(str(BASE_DIR))
 
+# FINAL values (from schema) 
+DEFAULT_VALUES = {
+    "targetCenterHeight": "0",
+    "requirementName": "TestReq",
+    "type": "Standing",
+    "extraRequirement": "false",
+    "deleted": "false",
+    "unPlannedElsewhere": "false",
+    "plannedElsewhere": "false",
+    "disseminationPriority": "7",
+    "worstAcceptableResolution": "1",
+    "cloudCoverageForcast": "0",
+    "percentUnusableData": "20",
+    "displayText": "No Comments",
+    "desirability": "7",
+    "anchor": "true",
+}
+
 def export_to_xml(gdf, output_xml_path):
-    """
-    מייצא GeoDataFrame לקובץ XML לפי הסכימה הנדרשת.
-    output_xml_path יכול להיות נתיב יחסי ל-BASE_DIR או נתיב מלא.
-    """
-    # יצירת נתיב מוחלט לשמירה
     target_path = Path(output_xml_path)
     if not target_path.is_absolute():
         target_path = BASE_DIR / output_xml_path
-    
-    # וידוא שהתיקייה קיימת
     target_path.parent.mkdir(parents=True, exist_ok=True)
     
-    # יצירת ה-XML
     root = ET.Element("message", {
         "xmlns": "http://scc/xml/schemas",
         "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
     })
     
-    # 1. Header
+    # Header
     icc_header = ET.SubElement(root, "iccHeader")
     ET.SubElement(icc_header, "messageType").text = "MissionRequirements"
+    ET.SubElement(icc_header, "originator").text = "foo"
+    ET.SubElement(icc_header, "originatorAddress").text = "foo-bar"
+    ET.SubElement(icc_header, "recipient").text = "bar-foo"
     
     now = datetime.now()
     ET.SubElement(icc_header, "creationTime").text = str(int(now.timestamp()))
     ET.SubElement(icc_header, "creationTimeString").text = now.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
     
-    # 2. Data
+    # 2. Mission Data
     mission_data = ET.SubElement(root, "missionRequirementsData")
     ET.SubElement(mission_data, "satellite").text = "OF7"
     ET.SubElement(mission_data, "scowId").text = "Foo#10225#BAR#-#1"
+    ET.SubElement(mission_data, "planRequirementId").text = "1693___1720"
+    ET.SubElement(mission_data, "updatedRequirementList").text = "false"
     
     req_list = ET.SubElement(mission_data, "requirementList")
     
-    # 3. Geometry processing
     for _, row in gdf.iterrows():
         req = ET.SubElement(req_list, "requirement")
+        
+        # Input values
         ET.SubElement(req, "palRequirementId").text = str(row.get('id', 'N/A'))
-        ET.SubElement(req, "priority").text = str(row.get('Priority', '0'))
+        ET.SubElement(req, "priority").text = str(row.get('Priority', '5'))
         
+        # Default values
+        for key, val in DEFAULT_VALUES.items():
+            ET.SubElement(req, key).text = val
+            
+        # Target Image Data
         target_data = ET.SubElement(req, "targetImageData")
-        poly_boundary = ET.SubElement(target_data, "polygonBoundary")
+        ET.SubElement(target_data, "targetCenterHeight").text = DEFAULT_VALUES["targetCenterHeight"]
         
-        # טיפול בגיאומטריה
+        poly_boundary = ET.SubElement(target_data, "polygonBoundary")
         if row.geometry and row.geometry.geom_type == 'Polygon':
-            coords = list(row.geometry.exterior.coords)
-            for coord in coords:
-                # לוקחים רק את שני האיברים הראשונים (x, y), מתעלמים מ-z אם קיים
-                lon, lat = coord[0], coord[1] 
-                
+            for coord in list(row.geometry.exterior.coords):
+                lon, lat = coord[0], coord[1]
                 pt = ET.SubElement(poly_boundary, "geographicPoint")
                 ET.SubElement(pt, "long").text = f"{lon:.6f}"
                 ET.SubElement(pt, "lat").text = f"{lat:.6f}"
                 ET.SubElement(pt, "heightUnknown")
+        
+        ET.SubElement(target_data, "nominalTargetGroundContrast")
+        ET.SubElement(target_data, "niirsNotApplicable")
+        
+        # More FINAL tags from schema
+        ET.SubElement(req, "monoImaging")
+        
+        # Constraints
+        cons = ET.SubElement(req, "coverageConstraints")
+        ET.SubElement(cons, "oneScan").text = "true"
+        ET.SubElement(cons, "oneScow").text = "false"
+        
+        # Time Constraints (Currently default values)
+        time_cons = ET.SubElement(req, "timeConstraints")
+        dates = ET.SubElement(time_cons, "imagingDates")
+        range_el = ET.SubElement(dates, "dateRange")
+        ET.SubElement(range_el, "start").text = "2011-06-05T00:00:00.000"
+        ET.SubElement(range_el, "end").text = "2013-01-01T01:00:00.000"
+        ET.SubElement(time_cons, "noImagingTimes")
     
-    # 4. שמירה עם הזחה (indentation) תקינה
     tree = ET.ElementTree(root)
     ET.indent(tree, space="    ", level=0)
     tree.write(target_path, encoding='utf-8', xml_declaration=True)
-    
-    print(f"XML exported successfully to: {target_path}")
 
 if __name__ == "__main__":
-    # מאפשר הרצה מהירה לבדיקה של הקובץ בלבד
-    print("xml_exporter module is ready.")
+    print("xml_exporter updated with full schema defaults.")

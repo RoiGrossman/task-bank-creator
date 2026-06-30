@@ -2,11 +2,11 @@ import sys
 import geopandas as gpd
 from pathlib import Path
 
-# הגדרת נתיב השורש
+# Define base path
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR))
 
-# ייבוא פונקציית הייצוא מה-src
+# Import the export function from src
 from src.xml_exporter import export_to_xml
 
 def process_shapefile_to_xml(shp_path):
@@ -19,7 +19,7 @@ def process_shapefile_to_xml(shp_path):
     print(f"Loading shapefile: {path.name}")
     gdf = gpd.read_file(path)
     
-    # בדיקות תקינות
+    # Feasibility check
     if len(gdf) == 0:
         print("CRITICAL: File is empty. No XML created.")
         return
@@ -30,24 +30,24 @@ def process_shapefile_to_xml(shp_path):
         print(f"CRITICAL: Missing columns in file: {missing}")
         return
 
-    # הגדרת נתיב הפלט (באותה תיקייה)
+    # Define output path (in the same directiry)
     output_xml = path.with_suffix(".xml")
     
-    # ייצוא
+    # Export 
     export_to_xml(gdf, str(output_xml))
     print(f"Process complete! XML saved to: {output_xml}")
 
 def main():
-    # העתקנו לכאן את הלוגיקה שהייתה ב-if __name__ == "__main__":
+    # We copied the logic from nain -if __name__ == "__main__":
     path_input = input("Enter the full path to the .shp file: ").strip('"')
     process_shapefile_to_xml(path_input)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        # הרצה מהטרמינל: python src/raw_shp_to_xml.py "נתיב/לקובץ.shp"
+        # Run from terminal: python src/raw_shp_to_xml.py "file_path.shp"
         target_file = sys.argv[1]
         process_shapefile_to_xml(target_file)
     else:
-        # הרצה ידנית
+        # Eanual run
         path_input = input("Enter the full path to the .shp file: ").strip('"')
         process_shapefile_to_xml(path_input)
