@@ -39,14 +39,14 @@ def export_to_xml(gdf, output_xml_path):
         req = ET.SubElement(req_list, "requirement")
         
         # Requirement data
-        ET.SubElement(req, "palRequirementId").text = str(row.get('id', 'N/A'))
         requirement_id = str(row.get('id')) if row.get('id') else str(uuid.uuid4())
         ET.SubElement(req, "palRequirementId").text = requirement_id
-        ET.SubElement(req, "requirementName").text = "TestReq"
+        requirement_name = str(row.get('name')) if row.get('name') else str("TestReq")
+        ET.SubElement(req, "requirementName").text = requirement_name
         ET.SubElement(req, "type").text = "Standing"
         ET.SubElement(req, "extraRequirement").text = "false"
         ET.SubElement(req, "deleted").text = "false"
-        ET.SubElement(req, "priority").text = str(row.get('Priority', '5'))
+        ET.SubElement(req, "priority").text = str(row.get('priority', '5'))
         ET.SubElement(req, "unPlannedElsewhere").text = "false"
         ET.SubElement(req, "plannedElsewhere").text = "false"
         ET.SubElement(req, "disseminationPriority").text = "7"

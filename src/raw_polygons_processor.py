@@ -82,7 +82,7 @@ def apply_priority_by_mode(gdf, mode, min_p, max_p, log_lines, is_deterministic)
     else:
         priorities = np.full(n, min_p)
         
-    gdf['Priority'] = np.round(priorities).astype(int)
+    gdf['priority'] = np.round(priorities).astype(int)
     return gdf
 
 def save_execution_summary_to_file(gdf, shp_path, summary_path, log_lines, sample_rows_to_show):
@@ -130,7 +130,7 @@ def main():
     
     gdf = apply_priority_by_mode(gdf, dist_mode, min_p, max_p, log_lines, is_deterministic)
     gdf['id'] = [str(uuid.uuid4()) for _ in range(len(gdf))]
-    gdf = gdf[['id', 'Priority', 'geometry']]
+    gdf = gdf[['id', 'priority', 'geometry']]
     
     output_shp = OUTPUT_DIR / 'prioritized_targets.shp'
     gdf.to_file(str(output_shp))
@@ -142,8 +142,8 @@ def main():
 
     print(f"Columns in GDF: {gdf.columns.tolist()}")
     
-    if 'Priority' in gdf.columns:
-        priority_counts = gdf['Priority'].value_counts().sort_index()
+    if 'priority' in gdf.columns:
+        priority_counts = gdf['priority'].value_counts().sort_index()
         summary_path = OUTPUT_DIR / 'summary.txt'
         
         print(f"Attempting to write summary to: {summary_path}")

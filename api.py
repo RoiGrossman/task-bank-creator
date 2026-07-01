@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -40,6 +40,14 @@ async def generate_xml(request: Request):
     """
     # 1. Get the JSON data from the request
     data = await request.json()
+
+    #Polygon exist validation
+    features = data.get("features", [])
+    if not features or not features[0].get("geometry"):
+        raise HTTPException(status_code=400, detail="Error in data inputs")
+
+    # Print data to terminalwindow
+    print("DEBUG DATA:", data)
     
     # 2. Convert the features to a GeoDataFrame
     # We assume 'features' is a key in the GeoJSON object

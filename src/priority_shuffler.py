@@ -29,7 +29,7 @@ def apply_shuffle_logic(gdf, mode):
     if 'orig_idx' not in gdf.columns:
         gdf['orig_idx'] = gdf.index
         
-    existing_priorities = sorted(gdf['Priority'].tolist())
+    existing_priorities = sorted(gdf['priority'].tolist())
     centroids = gdf.geometry.centroid
     
     mode_names = {
@@ -41,11 +41,11 @@ def apply_shuffle_logic(gdf, mode):
     logic_name = mode_names.get(mode, 'unknown')
     
     if mode == '1':
-        gdf['Priority'] = np.random.permutation(gdf['Priority'].values)
+        gdf['priority'] = np.random.permutation(gdf['priority'].values)
         
     elif mode == '2':
         max_p, min_p = max(existing_priorities), min(existing_priorities)
-        gdf['Priority'] = max_p + min_p - gdf['Priority']
+        gdf['priority'] = max_p + min_p - gdf['priority']
         
     elif mode == '3':
         # Calculate distance from center to apply high importance to edges
@@ -60,7 +60,7 @@ def apply_shuffle_logic(gdf, mode):
         gdf['tmp_dist'] = distances
         gdf = gdf.sort_values(by='tmp_dist', ascending=False).reset_index(drop=True)
         # Apply priorities
-        gdf['Priority'] = existing_priorities
+        gdf['priority'] = existing_priorities
         gdf = gdf.drop(columns=['tmp_dist'])
         
     elif mode == '4':
@@ -88,7 +88,7 @@ def apply_shuffle_logic(gdf, mode):
             
         remaining_indices = gdf[~mask_assigned].index
         new_priorities[remaining_indices] = available_priorities
-        gdf['Priority'] = new_priorities
+        gdf['priority'] = new_priorities
         gdf = gdf.drop(columns=['cluster_id'])
 
     return gdf, logic_name
@@ -121,7 +121,7 @@ def main():
 
     # Save Shapefile
     new_shp_path = target_output_folder / 'prioritized_targets.shp'
-    gdf[['id', 'Priority', 'geometry']].to_file(new_shp_path)
+    gdf[['id', 'priority', 'geometry']].to_file(new_shp_path)
     
     # Save XML
     output_xml = target_output_folder / f'tasks_shuffled_{mode}_{timestamp}.xml'

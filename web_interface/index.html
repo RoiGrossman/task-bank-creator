@@ -7,13 +7,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     <style>
-        #map { height: 600px; width: 100%; }
+        body {
+            background-color: #4d4d4d; 
+            color: #ffffff; /*Text color*/
+            margin: 0;
+            padding: 20px;
+        }
+        #map { height: 500px; width: 50%; }
     </style>
 </head>
 <body>
-    <h1>Draw Target Polygon</h1>
-    <div id="map"></div>
-    <button onclick="exportGeoJSON()">Export to XML</button>
+    
+    <h1>Polygon&Constraints Generator</h1>
+    <div id="main-container" style="display: flex; width: 100%;">
+    <div id="map" style="height: 500px; width: 50%;"></div>
+    
+    <div id="sidebar" style="width: 50%; padding: 20px; background-color: #383838;">
+        <h3>Target Details</h3>
+        <label>Name:</label><br>
+        <input type="text" id="targetName"><br><br>
+        
+        <label>Priority:</label><br>
+        <input type="number" id="Priority"><br><br>
+        
+        <label>Notes:</label><br>
+        <textarea id="notes"></textarea><br><br>
+        
+        <button onclick="saveData()">Apply</button>
+        <button onclick="exportGeoJSON()">Export to XML</button>
+    </div>
+    </div>
+    
+    
 
     <script>
         // Set default view to USA
@@ -35,31 +60,58 @@
 
         // Function to send the polygon data to our Python API
 	async function exportGeoJSON() {
-    	var data = drawnItems.toGeoJSON();
+    // 1. קבלת הגאומטריה מהמפה
+    var geoData = drawnItems.toGeoJSON();
     
-    	// The relative URL '/' tells the browser to use the same host/port 
-   	 // that served the HTML file
-   	 const response = await fetch('/generate-xml', {
-        	method: 'POST',
-        	headers: { 'Content-Type': 'application/json' },
-        	body: JSON.stringify(data)
-    	});
+    // 2. איסוף הנתונים מהטופס
+    const targetDetails = {
+        name: document.getElementById('targetName').value,
+        priority: document.getElementById('Priority').value,
+        notes: document.getElementById('notes').value
+    };
 
-    	if (response.ok) {
-        	// Handle the XML file download
-        	const blob = await response.blob();
-        	const url = window.URL.createObjectURL(blob);
-        	const a = document.createElement('a');
-        	a.href = url;
-        	a.download = 'target.xml';
-        	document.body.appendChild(a);
-        	a.click();
-        	a.remove();
-        	alert("XML generated successfully!");
-    	} else {
-        	alert("Error generating XML");
-    	}
-	}
+    // 3. בניית המבנה שהשרת מצפה לו
+    // אנחנו מוסיפים את ה-properties לתוך כל Feature
+    const payload = {
+        features: geoData.features.map(feature => ({
+            ...feature,
+            properties: targetDetails // כאן אנחנו מחברים את הנתונים מהטופס
+        }))
+    };
+
+    // 4. שליחת ה-payload במקום ה-data המקורי
+    const response = await fetch('/generate-xml', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload) 
+    });
+
+    if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'manual_target.xml';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        alert("XML generated successfully!");
+    } else {
+        alert("Error generating XML");
+    }
+}
+
+    function saveData() {
+    const targetData = {
+        name: document.getElementById('targetName').value,
+        Priority: document.getElementById('Priority').value,
+        notes: document.getElementById('notes').value
+    };
+    
+    console.log("נתונים שנאספו:", targetData);
+    // כאן תוכל להוסיף לוגיקה שמשייכת את זה לפוליגון האחרון שצויר
+    alert("הנתונים נשמרו בהצלחה!");
+    }
        	 
     </script>
 </body>
