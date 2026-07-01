@@ -3,37 +3,16 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-if str(BASE_DIR) not in sys.path:
-    sys.path.append(str(BASE_DIR))
-
-# FINAL values (from schema) 
-DEFAULT_VALUES = {
-    "targetCenterHeight": "0",
-    "requirementName": "TestReq",
-    "type": "Standing",
-    "extraRequirement": "false",
-    "deleted": "false",
-    "unPlannedElsewhere": "false",
-    "plannedElsewhere": "false",
-    "disseminationPriority": "7",
-    "worstAcceptableResolution": "1",
-    "cloudCoverageForcast": "0",
-    "percentUnusableData": "20",
-    "displayText": "No Comments",
-    "desirability": "7",
-    "anchor": "true",
-}
+# Paths and base directories
 
 def export_to_xml(gdf, output_xml_path):
     target_path = Path(output_xml_path)
-    if not target_path.is_absolute():
-        target_path = BASE_DIR / output_xml_path
     target_path.parent.mkdir(parents=True, exist_ok=True)
     
     root = ET.Element("message", {
         "xmlns": "http://scc/xml/schemas",
-        "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
+        "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+        "xsi:schemaLocation": "http://scc/xml/schemas V:sccXSD_Message.xsd"
     })
     
     # Header
@@ -42,12 +21,11 @@ def export_to_xml(gdf, output_xml_path):
     ET.SubElement(icc_header, "originator").text = "foo"
     ET.SubElement(icc_header, "originatorAddress").text = "foo-bar"
     ET.SubElement(icc_header, "recipient").text = "bar-foo"
-    
     now = datetime.now()
     ET.SubElement(icc_header, "creationTime").text = str(int(now.timestamp()))
     ET.SubElement(icc_header, "creationTimeString").text = now.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
     
-    # 2. Mission Data
+    # Mission Data
     mission_data = ET.SubElement(root, "missionRequirementsData")
     ET.SubElement(mission_data, "satellite").text = "OF7"
     ET.SubElement(mission_data, "scowId").text = "Foo#10225#BAR#-#1"
@@ -59,31 +37,38 @@ def export_to_xml(gdf, output_xml_path):
     for _, row in gdf.iterrows():
         req = ET.SubElement(req_list, "requirement")
         
-        # Input values
+        # Requirement data
         ET.SubElement(req, "palRequirementId").text = str(row.get('id', 'N/A'))
+        ET.SubElement(req, "requirementName").text = "TestReq"
+        ET.SubElement(req, "type").text = "Standing"
+        ET.SubElement(req, "extraRequirement").text = "false"
+        ET.SubElement(req, "deleted").text = "false"
         ET.SubElement(req, "priority").text = str(row.get('Priority', '5'))
+        ET.SubElement(req, "unPlannedElsewhere").text = "false"
+        ET.SubElement(req, "plannedElsewhere").text = "false"
+        ET.SubElement(req, "disseminationPriority").text = "7"
+        ET.SubElement(req, "worstAcceptableResolution").text = "1"
+        ET.SubElement(req, "cloudCoverageForcast").text = "0"
+        ET.SubElement(req, "percentUnusableData").text = "20"
+        ET.SubElement(req, "displayText").text = "No Comments"
         
-        # Default values
-        for key, val in DEFAULT_VALUES.items():
-            ET.SubElement(req, key).text = val
-            
         # Target Image Data
         target_data = ET.SubElement(req, "targetImageData")
-        ET.SubElement(target_data, "targetCenterHeight").text = DEFAULT_VALUES["targetCenterHeight"]
-        
+        ET.SubElement(target_data, "targetCenterHeight").text = "500"
         poly_boundary = ET.SubElement(target_data, "polygonBoundary")
         if row.geometry and row.geometry.geom_type == 'Polygon':
             for coord in list(row.geometry.exterior.coords):
-                lon, lat = coord[0], coord[1]
                 pt = ET.SubElement(poly_boundary, "geographicPoint")
-                ET.SubElement(pt, "long").text = f"{lon:.6f}"
-                ET.SubElement(pt, "lat").text = f"{lat:.6f}"
+                ET.SubElement(pt, "long").text = f"{coord[0]:.6f}"
+                ET.SubElement(pt, "lat").text = f"{coord[1]:.6f}"
                 ET.SubElement(pt, "heightUnknown")
         
         ET.SubElement(target_data, "nominalTargetGroundContrast")
         ET.SubElement(target_data, "niirsNotApplicable")
         
-        # More FINAL tags from schema
+        # End of Requirement fields
+        ET.SubElement(req, "desirability").text = "7"
+        ET.SubElement(req, "anchor").text = "true"
         ET.SubElement(req, "monoImaging")
         
         # Constraints
@@ -91,7 +76,7 @@ def export_to_xml(gdf, output_xml_path):
         ET.SubElement(cons, "oneScan").text = "true"
         ET.SubElement(cons, "oneScow").text = "false"
         
-        # Time Constraints (Currently default values)
+        # Time Constraints
         time_cons = ET.SubElement(req, "timeConstraints")
         dates = ET.SubElement(time_cons, "imagingDates")
         range_el = ET.SubElement(dates, "dateRange")
@@ -102,6 +87,3 @@ def export_to_xml(gdf, output_xml_path):
     tree = ET.ElementTree(root)
     ET.indent(tree, space="    ", level=0)
     tree.write(target_path, encoding='utf-8', xml_declaration=True)
-
-if __name__ == "__main__":
-    print("xml_exporter updated with full schema defaults.")
