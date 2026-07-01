@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Target Generator</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <style>
+        #map { height: 600px; width: 100%; }
+    </style>
+</head>
+<body>
+    <h1>Draw Target Polygon</h1>
+    <div id="map"></div>
+    <button onclick="exportGeoJSON()">Export to XML</button>
+
+    <script>
+        // Set default view to USA
+        var map = L.map('map').setView([38, -98], 4);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        var drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+        var drawControl = new L.Control.Draw({
+            draw: { polygon: true, marker: false, circle: false, rectangle: true, polyline: false },
+            edit: { featureGroup: drawnItems }
+        });
+        map.addControl(drawControl);
+
+        map.on(L.Draw.Event.CREATED, function (e) {
+            drawnItems.addLayer(e.layer);
+        });
+
+        // Function to send the polygon data to our Python API
+	async function exportGeoJSON() {
+    	var data = drawnItems.toGeoJSON();
+    
+    	// The relative URL '/' tells the browser to use the same host/port 
+   	 // that served the HTML file
+   	 const response = await fetch('/generate-xml', {
+        	method: 'POST',
+        	headers: { 'Content-Type': 'application/json' },
+        	body: JSON.stringify(data)
+    	});
+
+    	if (response.ok) {
+        	// Handle the XML file download
+        	const blob = await response.blob();
+        	const url = window.URL.createObjectURL(blob);
+        	const a = document.createElement('a');
+        	a.href = url;
+        	a.download = 'target.xml';
+        	document.body.appendChild(a);
+        	a.click();
+        	a.remove();
+        	alert("XML generated successfully!");
+    	} else {
+        	alert("Error generating XML");
+    	}
+	}
+       	 
+    </script>
+</body>
+</html>

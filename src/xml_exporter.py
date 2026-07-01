@@ -2,6 +2,7 @@ import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
+import uuid
 
 # Paths and base directories
 
@@ -39,6 +40,8 @@ def export_to_xml(gdf, output_xml_path):
         
         # Requirement data
         ET.SubElement(req, "palRequirementId").text = str(row.get('id', 'N/A'))
+        requirement_id = str(row.get('id')) if row.get('id') else str(uuid.uuid4())
+        ET.SubElement(req, "palRequirementId").text = requirement_id
         ET.SubElement(req, "requirementName").text = "TestReq"
         ET.SubElement(req, "type").text = "Standing"
         ET.SubElement(req, "extraRequirement").text = "false"

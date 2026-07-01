@@ -21,7 +21,6 @@ Thumbs.db
 2-data/raw/
 1-raw_OSM_exports/
 *.pbf
-*.xml
 
 # QGIS project files
 *.qgs
