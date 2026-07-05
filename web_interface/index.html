@@ -7,41 +7,71 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     <style>
-        body {
-            background-color: #4d4d4d; 
-            color: #ffffff; /*Text color*/
-            margin: 0;
-            padding: 20px;
-        }
-        #map { height: 500px; width: 50%; }
-    </style>
-</head>
-<body>
+    body {
+        background-color: #4d4d4d; 
+        color: #ffffff;
+        margin: 0;
+        padding: 20px;
+        font-family: 'Rubik', Segoe UI, sans-serif;
+    }
+    #map { height: 500px; width: 50%; }
     
-    <h1>Polygon&Constraints Generator</h1>
-    <div id="main-container" style="display: flex; width: 100%;">
-    <div id="map" style="height: 500px; width: 50%;"></div>
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        width: 100%;
+    }
+
+    .field { width: 100%; }
+    .field input { width: 90%; }
+    
+    /* קלאס להרחבת שדות לכל רוחב ה-Sidebar */
+    .full-width { grid-column: span 2; }
+    
+    /* עיצוב פנימי לטווחים */
+    .range-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .range-group input { width: 90%; }
+</style>
+
+<h1>Polygon & Constraints Generator</h1>
+<div id="main-container" style="display: flex; width: 100%; gap: 20px;">
+    <div id="map"></div>
     
     <div id="sidebar" style="width: 50%; padding: 20px; background-color: #383838;">
-        <h3>Target Details</h3>
-        <label>Name:</label><br>
-        <input type="text" id="targetName"><br><br>
-        
-        <label>Priority:</label><br>
-        <input type="number" id="priority"><br><br>
-        
-        <label>Resolution:</label><br>
-        <input type="number" id="resolution" step="any"></input><br><br>
+        <h2>Target Details</h2>
+        <div class="form-grid">
+            <div class="field"><label>Name:</label><br><input type="text" id="targetName"></div>
+            <div class="field"><label>Priority:</label><br><input type="number" id="priority"></div>
+            <div class="field"><label>GSD:</label><br><input type="number" id="resolution" step="any"></div>
+            <div class="field"><label>Scan Azimuth:</label><br><input type="number" id="scanAzimuth" step="any"></div>
 
-        <label>Notes:</label><br>
-        <textarea id="notes"></textarea><br><br>
+            <div class="full-width">
+                <h3>View Azimuth Range <span style="font-size: 0.8em; font-weight: normal;">(Clockwise)</span></h3>
+                <div class="range-group">
+                    <div><label>Min:</label><br><input type="number" id="viewAzMin" step="any"></div>
+                    <div><label>Max:</label><br><input type="number" id="viewAzMax" step="any"></div>
+                </div>
+            </div>
 
-        <!-- If user wants to add a new field, do it here -->
-        
-        <button onclick="saveData()">Apply</button>
-        <button onclick="exportGeoJSON()">Export to XML</button>
+            <div class="full-width">
+                <h3>Sat Elevation Range</h3>
+                <div class="range-group">
+                    <div><label>Min:</label><br><input type="number" id="satElevMin" step="any"></div>
+                    <div><label>Max:</label><br><input type="number" id="satElevMax" step="any"></div>
+                </div>
+            </div>
+            
+            <div class="full-width">
+                <button onclick="exportGeoJSON()" style="padding: 10px 20px; cursor: pointer;">Export to XML</button>
+            </div>
+        </div>
     </div>
-    </div>
+</div>
     
     
 
@@ -63,48 +93,58 @@
             drawnItems.addLayer(e.layer);
         });
 
-        // Function to send the polygon data to our Python API
+    
+    // Function to send the polygon data to our Python API
 	async function exportGeoJSON() {
-    console.log("Button clicked!");
+    console.log("Export Started...");
 
-    const fieldsToCheck = ['targetName', 'priority', 'resolution' /*If user wants to add a new field, do it here*/]; 
-    for (let id of fieldsToCheck) {
+    console.log("Collecting Data...");
+    const targetData = {
+        name: document.getElementById('targetName').value,
+        priority: document.getElementById('priority').value,
+        resolution: document.getElementById('resolution').value,
+        scanAzimuth: document.getElementById('scanAzimuth').value, // This field is collected but not implemented in xml!
+        viewAzMin: document.getElementById('viewAzMin').value, // This field is collected but not implemented in xml!
+        viewAzMax: document.getElementById('viewAzMax').value, // This field is collected but not implemented in xml!
+        satElevMin: document.getElementById('satElevMin').value, // This field is collected but not implemented in xml! 
+        satElevMax: document.getElementById('satElevMax').value // This field is collected but not implemented in xml! 
+ 
+        // Add new fields here if needed
+    };
+    console.log("Data Collected");
+
+    console.log("Verifying Data...");
+    const mandatoryFieldsVerification = ['targetName', 'priority', 'resolution'/*Add new fields here if needed*/]; 
+    for (let id of mandatoryFieldsVerification) {
         if (!document.getElementById(id).value) {
-            console.log("2. Error: Field missing - " + id);
+            console.log("Error: Field missing - " + id);
             alert("Data missing: " + id);
             return;
         }
     }
+    console.log("Data Verified");
 
-    // 1. קבלת הגאומטריה מהמפה
+    // Collect Polygon from the map
     var geoData = drawnItems.toGeoJSON();
-    console.log("3. GeoData length:", geoData.features.length);
+    console.log("GeoData length:", geoData.features.length);
     
     if (geoData.features.length === 0) {
-        console.log("4. Error: No polygon");
+        console.log("Error: No polygon");
         alert("Polygon Missing");
-        return; // כאן זה נגמר
-    } // <--- הוספתי סוגר סוגר ל-if הזה!
+        return;
+    } 
+    console.log("Polygon Collected and verified");
 
-    // 2. איסוף הנתונים מהטופס
-    const targetDetails = {
-        name: document.getElementById('targetName').value,
-        priority: document.getElementById('priority').value,
-        resolution: document.getElementById('resolution').value,
-        notes: document.getElementById('notes').value
-        //If user wants to add a new field, do it here
-    };
-
-    // 3. בניית המבנה שהשרת מצפה לו
+    // Construct structure for the server
     const payload = {
         features: geoData.features.map(feature => ({
             ...feature,
-            properties: targetDetails
+            properties: targetData
         }))
     };
 
-    // 4. שליחת ה-payload
-    console.log("5. Starting fetch...");
+    // Send Payload
+    console.log("Starting fetch...");
     const response = await fetch('/generate-xml', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -122,22 +162,10 @@
         a.remove();
         alert("XML generated successfully!");
     } else {
-        console.log("7. Server error, status:", response.status);
+        console.log("Server error, status:", response.status);
         alert("Error generating XML");
     }
-}
-
-    function saveData() {
-    const targetData = {
-        name: document.getElementById('targetName').value,
-        priority: document.getElementById('priority').value,
-        resolution: document.getElementById('resolution').value,
-        notes: document.getElementById('notes').value
-    };
-    
-    console.log("נתונים שנאספו:", targetData);
-    // כאן תוכל להוסיף לוגיקה שמשייכת את זה לפוליגון האחרון שצויר
-    alert("הנתונים נשמרו בהצלחה!");
+        console.log("Export Complete");
     }
        	 
     </script>

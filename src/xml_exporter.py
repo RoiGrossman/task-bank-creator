@@ -39,7 +39,7 @@ def export_to_xml(gdf, output_xml_path):
         req = ET.SubElement(req_list, "requirement")
         
         # Requirement data
-        #If user wants to add a new field, do it where it belongs
+        # Add new fields where it belongs
         requirement_id = str(row.get('id')) if row.get('id') else str(uuid.uuid4())
         ET.SubElement(req, "palRequirementId").text = requirement_id
         requirement_name = str(row.get('name')) if row.get('name') else str("TestReq")
