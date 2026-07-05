@@ -6,22 +6,22 @@ from typing import List, Optional
 import geopandas as gpd
 from pathlib import Path
 from src.xml_exporter import export_to_xml
+from datetime import datetime, time
 
 # Dataset definition
 class FeatureProperties(BaseModel):
     name: str
     priority: str
     resolution: str
-    scanAzimuth: Optional[str] = None 
-    # scanAzimuth is collected but not implemented in xml!
-    viewAzMin: Optional[str] = None
-    # scanAzimuth is collected but not implemented in xml!
-    viewAzMax: Optional[str] = None
-    # scanAzimuth is collected but not implemented in xml!
-    satElevMin: Optional[str] = None
-    # scanAzimuth is collected but not implemented in xml!
-    satElevMax: Optional[str] = None
-    # scanAzimuth is collected but not implemented in xml!
+    scanAzimuth: Optional[str] = None # scanAzimuth is collected but not implemented in xml!
+    dateRangeStart: datetime # dateRangeStart is collected but not implemented in xml!
+    dateRangeEnd: datetime # dateRangeEnd is collected but not implemented in xml!
+    timeInDayStart: time # timeInDayStart is collected but not implemented in xml!
+    timeInDayEnd: time # timeInDayEnd is collected but not implemented in xml!
+    viewAzMin: Optional[str] = None # viewAzMin is collected but not implemented in xml!
+    viewAzMax: Optional[str] = None # viewAzMax is collected but not implemented in xml!
+    satElevMin: Optional[str] = None # satElevMin is collected but not implemented in xml!
+    satElevMax: Optional[str] = None # satElevMax is collected but not implemented in xml!
 
     # notes: Optional[str] = None  # Optional
     # Add new fields here if needed

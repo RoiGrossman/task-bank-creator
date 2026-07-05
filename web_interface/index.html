@@ -11,44 +11,60 @@
         background-color: #4d4d4d; 
         color: #ffffff;
         margin: 0;
-        padding: 20px;
+        padding: 10px;
         font-family: 'Rubik', Segoe UI, sans-serif;
     }
-    #map { height: 500px; width: 50%; }
-    
+    #map { 
+        height: 80vh; width: 50%; }
     .form-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 15px;
         width: 100%;
     }
-
     .field { width: 100%; }
     .field input { width: 90%; }
-    
-    /* קלאס להרחבת שדות לכל רוחב ה-Sidebar */
     .full-width { grid-column: span 2; }
-    
-    /* עיצוב פנימי לטווחים */
     .range-group {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
     }
     .range-group input { width: 90%; }
+    .required::after {
+        content: " *";
+        color: red;
+        font-weight: bold;
+    }
 </style>
 
 <h1>Polygon & Constraints Generator</h1>
 <div id="main-container" style="display: flex; width: 100%; gap: 20px;">
     <div id="map"></div>
     
-    <div id="sidebar" style="width: 50%; padding: 20px; background-color: #383838;">
+    <div id="sidebar" style="width: 50%; padding: 20px; background-color: #383838; height: 75vh; overflow-y: auto;">
         <h2>Target Details</h2>
         <div class="form-grid">
-            <div class="field"><label>Name:</label><br><input type="text" id="targetName"></div>
-            <div class="field"><label>Priority:</label><br><input type="number" id="priority"></div>
-            <div class="field"><label>GSD:</label><br><input type="number" id="resolution" step="any"></div>
+            <div class="field"><label class="required">Name:</label><br><input type="text" id="targetName"></div>
+            <div class="field"><label class="required">Priority:</label><br><input type="number" id="priority"></div>
+            <div class="field"><label class="required">GSD:</label><br><input type="number" id="resolution" step="any"></div>
             <div class="field"><label>Scan Azimuth:</label><br><input type="number" id="scanAzimuth" step="any"></div>
+
+            <div class="full-width">
+                <h3>Task Date&Time Range <span style="font-size: 0.8em; font-weight: normal;">(UTC)</span></h3>
+                <div class="range-group">
+                    <div><label class="required">From:</label><br><input type="datetime-local" id="dateRangeStart"></div>
+                    <div><label class="required">To:</label><br><input type="datetime-local" id="dateRangeEnd"></div>
+                </div>
+            </div>
+
+            <div class="full-width">
+                <h3>Task Time in Day Range <span style="font-size: 0.8em; font-weight: normal;">(UTC)</span></h3>
+                <div class="range-group">
+                    <div><label>From:</label><br><input type="time" id="timeInDayStart"></div>
+                    <div><label>To:</label><br><input type="time" id="timeInDayEnd"></div>
+                </div>
+            </div>
 
             <div class="full-width">
                 <h3>View Azimuth Range <span style="font-size: 0.8em; font-weight: normal;">(Clockwise)</span></h3>
@@ -104,6 +120,10 @@
         priority: document.getElementById('priority').value,
         resolution: document.getElementById('resolution').value,
         scanAzimuth: document.getElementById('scanAzimuth').value, // This field is collected but not implemented in xml!
+        dateRangeStart: document.getElementById('dateRangeStart').value, // This field is collected but not implemented in xml!
+        dateRangeEnd: document.getElementById('dateRangeEnd').value, // This field is collected but not implemented in xml!
+        timeInDayStart: document.getElementById('timeInDayStart').value, // This field is collected but not implemented in xml!
+        timeInDayEnd: document.getElementById('timeInDayEnd').value, // This field is collected but not implemented in xml!
         viewAzMin: document.getElementById('viewAzMin').value, // This field is collected but not implemented in xml!
         viewAzMax: document.getElementById('viewAzMax').value, // This field is collected but not implemented in xml!
         satElevMin: document.getElementById('satElevMin').value, // This field is collected but not implemented in xml! 
@@ -114,7 +134,7 @@
     console.log("Data Collected");
 
     console.log("Verifying Data...");
-    const mandatoryFieldsVerification = ['targetName', 'priority', 'resolution'/*Add new fields here if needed*/]; 
+    const mandatoryFieldsVerification = ['targetName', 'priority', 'resolution', 'dateRangeStart', 'dateRangeEnd' /*Add new fields here if needed*/]; 
     for (let id of mandatoryFieldsVerification) {
         if (!document.getElementById(id).value) {
             console.log("Error: Field missing - " + id);
