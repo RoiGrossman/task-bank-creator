@@ -1,18 +1,31 @@
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import FileResponse
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List, Optional
 import geopandas as gpd
-import os
-from src.xml_exporter import export_to_xml
 from pathlib import Path
+from src.xml_exporter import export_to_xml
 
+# --- הגדרת מבנה הנתונים (Pydantic Models) ---
+class FeatureProperties(BaseModel):
+    name: str
+    priority: str
+    resolution: str
+    notes: Optional[str] = None  # Optional
+    #If user wants to add a new field, do it here
 
-# Initialize the API
+class Feature(BaseModel):
+    type: str = "Feature"
+    geometry: dict
+    properties: FeatureProperties
+
+class GeoJSONPayload(BaseModel):
+    features: List[Feature]
+# ---------------------------------------------
+
 app = FastAPI()
 
-# Enable CORS to allow the frontend (HTML) to communicate with the backend
-# Don't release to the web!
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,44 +33,40 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# הגדרת נתיבים
+BASE_DIR = Path(__file__).resolve().parent
+INDEX_FILE = BASE_DIR / "web_interface" / "index.html"
+EXPORT_DIR = BASE_DIR / "2-data" / "processed" / "xml_ready_taskfiles" / "manual_exports"
+EXPORT_DIR.mkdir(parents=True, exist_ok=True)
+
 @app.get("/")
 async def get_index():
-    """
-    Serves the frontend HTML file.
-    """
-    with open("web_interface/index.html", "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
-
-EXPORT_DIR = Path.cwd() / "2-data" / "processed" / "xml_ready_taskfiles" / "manual_exports"
-EXPORT_DIR.mkdir(exist_ok=True)
-
+    if not INDEX_FILE.exists():
+        raise HTTPException(status_code=404, detail="HTML file not found")
+    return HTMLResponse(content=INDEX_FILE.read_text(encoding="utf-8"))
 
 @app.post("/generate-xml")
-async def generate_xml(request: Request):
+async def generate_xml(payload: GeoJSONPayload):
     """
-    Receives GeoJSON data from the frontend, converts it to XML, 
-    and returns the file for download.
+    קבלת נתונים מובנים ומעבר ל-XML
     """
-    # 1. Get the JSON data from the request
-    data = await request.json()
-
-    #Polygon exist validation
-    features = data.get("features", [])
-    if not features or not features[0].get("geometry"):
-        raise HTTPException(status_code=400, detail="Error in data inputs")
-
-    # Print data to terminalwindow
-    print("DEBUG DATA:", data)
-    
-    # 2. Convert the features to a GeoDataFrame
-    # We assume 'features' is a key in the GeoJSON object
-    gdf = gpd.GeoDataFrame.from_features(data["features"])
-    
-    # 3. Set the output path
-    output_filename = EXPORT_DIR / "manual_target.xml"
-    
-    # 4. Run the export logic
-    export_to_xml(gdf, output_filename)
-    
-    # 5. Return the file to the user
-    return FileResponse(output_filename, media_type='application/xml', filename='manual_target.xml')
+    print("DEBUG: Payload data:", payload.model_dump())
+    try:
+        # Pydantic כבר תיקף שהנתונים תקינים לפני שהגענו לכאן
+        data_dict = payload.model_dump()
+        
+        # 1. הפיכה ל-GeoDataFrame
+        gdf = gpd.GeoDataFrame.from_features(data_dict["features"])
+        
+        # 2. שמירה
+        output_path = EXPORT_DIR / "manual_target.xml"
+        export_to_xml(gdf, output_path)
+        
+        return FileResponse(
+            path=output_path, 
+            media_type='application/xml', 
+            filename='manual_target.xml'
+        )
+    except Exception as e:
+        print(f"Error during export: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")

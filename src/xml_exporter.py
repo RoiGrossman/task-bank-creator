@@ -39,6 +39,7 @@ def export_to_xml(gdf, output_xml_path):
         req = ET.SubElement(req_list, "requirement")
         
         # Requirement data
+        #If user wants to add a new field, do it where it belongs
         requirement_id = str(row.get('id')) if row.get('id') else str(uuid.uuid4())
         ET.SubElement(req, "palRequirementId").text = requirement_id
         requirement_name = str(row.get('name')) if row.get('name') else str("TestReq")
@@ -46,11 +47,13 @@ def export_to_xml(gdf, output_xml_path):
         ET.SubElement(req, "type").text = "Standing"
         ET.SubElement(req, "extraRequirement").text = "false"
         ET.SubElement(req, "deleted").text = "false"
-        ET.SubElement(req, "priority").text = str(row.get('priority', '5'))
+        requirement_priority = str(row.get('priority'))
+        ET.SubElement(req, "priority").text = requirement_priority
         ET.SubElement(req, "unPlannedElsewhere").text = "false"
         ET.SubElement(req, "plannedElsewhere").text = "false"
         ET.SubElement(req, "disseminationPriority").text = "7"
-        ET.SubElement(req, "worstAcceptableResolution").text = "1"
+        requirement_res = str(row.get('resolution')) if row.get('resolution') else str("1")
+        ET.SubElement(req, "worstAcceptableResolution").text = requirement_res
         ET.SubElement(req, "cloudCoverageForcast").text = "0"
         ET.SubElement(req, "percentUnusableData").text = "20"
         ET.SubElement(req, "displayText").text = "No Comments"

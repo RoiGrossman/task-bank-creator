@@ -28,10 +28,15 @@
         <input type="text" id="targetName"><br><br>
         
         <label>Priority:</label><br>
-        <input type="number" id="Priority"><br><br>
+        <input type="number" id="priority"><br><br>
         
+        <label>Resolution:</label><br>
+        <input type="number" id="resolution" step="any"></input><br><br>
+
         <label>Notes:</label><br>
         <textarea id="notes"></textarea><br><br>
+
+        <!-- If user wants to add a new field, do it here -->
         
         <button onclick="saveData()">Apply</button>
         <button onclick="exportGeoJSON()">Export to XML</button>
@@ -60,26 +65,46 @@
 
         // Function to send the polygon data to our Python API
 	async function exportGeoJSON() {
+    console.log("Button clicked!");
+
+    const fieldsToCheck = ['targetName', 'priority', 'resolution' /*If user wants to add a new field, do it here*/]; 
+    for (let id of fieldsToCheck) {
+        if (!document.getElementById(id).value) {
+            console.log("2. Error: Field missing - " + id);
+            alert("Data missing: " + id);
+            return;
+        }
+    }
+
     // 1. קבלת הגאומטריה מהמפה
     var geoData = drawnItems.toGeoJSON();
+    console.log("3. GeoData length:", geoData.features.length);
     
+    if (geoData.features.length === 0) {
+        console.log("4. Error: No polygon");
+        alert("Polygon Missing");
+        return; // כאן זה נגמר
+    } // <--- הוספתי סוגר סוגר ל-if הזה!
+
     // 2. איסוף הנתונים מהטופס
     const targetDetails = {
         name: document.getElementById('targetName').value,
-        priority: document.getElementById('Priority').value,
+        priority: document.getElementById('priority').value,
+        resolution: document.getElementById('resolution').value,
         notes: document.getElementById('notes').value
+        //If user wants to add a new field, do it here
     };
 
     // 3. בניית המבנה שהשרת מצפה לו
-    // אנחנו מוסיפים את ה-properties לתוך כל Feature
     const payload = {
         features: geoData.features.map(feature => ({
             ...feature,
-            properties: targetDetails // כאן אנחנו מחברים את הנתונים מהטופס
+            properties: targetDetails
         }))
     };
 
-    // 4. שליחת ה-payload במקום ה-data המקורי
+    // 4. שליחת ה-payload
+    console.log("5. Starting fetch...");
     const response = await fetch('/generate-xml', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -97,6 +122,7 @@
         a.remove();
         alert("XML generated successfully!");
     } else {
+        console.log("7. Server error, status:", response.status);
         alert("Error generating XML");
     }
 }
@@ -104,7 +130,8 @@
     function saveData() {
     const targetData = {
         name: document.getElementById('targetName').value,
-        Priority: document.getElementById('Priority').value,
+        priority: document.getElementById('priority').value,
+        resolution: document.getElementById('resolution').value,
         notes: document.getElementById('notes').value
     };
     
