@@ -36,12 +36,17 @@
         color: red;
         font-weight: bold;
     }
+    
+    .tab-btn { padding: 10px; cursor: pointer; background: #555; color: white; border: none; }
+    .tab-btn.active { background: #007bff; } /* צבע לכפתור שנבחר */
+    .tab-content { display: none; } /* מוסתר כברירת מחדל */
 </style>
 
 <h1>Polygon & Constraints Generator</h1>
 <div id="main-container" style="display: flex; width: 100%; gap: 20px;">
     <div id="map"></div>
     
+    <!-- Target Inputs -->
     <div id="sidebar" style="width: 50%; padding: 20px; background-color: #383838; height: 75vh; overflow-y: auto;">
         <h2>Target Details</h2>
         <div class="form-grid">
@@ -87,6 +92,20 @@
             </div>
         </div>
     </div>
+
+    <!-- Tabs -->
+    <div id="Tabs" ...>
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="openTab(event, 'POC')">POC</button>
+        <button class="tab-btn" onclick="openTab(event, 'MVP')">MVP</button>
+    </div>
+
+        <div id="POC" class="tab-content" style="display: block;">
+    </div>
+
+        <div id="MVP" class="tab-content" style="display: none;">
+    </div>
+</div>
 </div>
     
     
@@ -186,6 +205,20 @@
         alert("Error generating XML");
     }
         console.log("Export Complete");
+    }
+
+    function openTab(evt, tabName) {
+    // הסתרת כל התוכן
+    const contents = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < contents.length; i++) contents[i].style.display = "none";
+
+    // הסרת ה-active מכל הכפתורים
+    const btns = document.getElementsByClassName("tab-btn");
+    for (let i = 0; i < btns.length; i++) btns[i].classList.remove("active");
+
+    // הצגת הטאב הנבחר
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.classList.add("active");
     }
        	 
     </script>
