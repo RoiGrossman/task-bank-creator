@@ -1,17 +1,14 @@
-import sys
-import datetime
 import shutil
 import geopandas as gpd
 import numpy as np
-import random
+import datetime
+import sys
 from pathlib import Path
 
-
-# Define base directory
+# Base path setup
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR))
 
-# Define routes
 DATA_PROCESSED = BASE_DIR / "2-data" / "processed"
 OUTPUT_TARGETS = DATA_PROCESSED / "output_targets"
 
@@ -22,86 +19,99 @@ def load_shapefile(shp_path):
     print(f"Loading shapefile from {shp_path}...")
     return gpd.read_file(shp_path)
 
+def apply_constraint(gdf, mode, rng):
+    # Determine eligible pool for sampling
+    eligible_indices = gdf.index.tolist()
+    
+    # Optional selective filtering based on existing parameters
+    if input("Apply constraint selectively? (y/n): ").lower() == 'y':
+        print("\nAvailable parameters for filtering:")
+        columns = list(gdf.columns)
+        for i, col in enumerate(columns):
+            print(f"[{i}] {col}")
+        
+        while True:
+            choice = input(f"Select parameter index (0-{len(columns)-1}): ")
+            if choice.isdigit() and int(choice) < len(columns):
+                col = columns[int(choice)]
+                break
+            print("Invalid selection.")
+            
+        val_min = float(input(f"Filter min value for '{col}': "))
+        val_max = float(input(f"Filter max value for '{col}': "))
+        
+        mask = (gdf[col] >= val_min) & (gdf[col] <= val_max)
+        eligible_indices = gdf.index[mask].tolist()
+        print(f"Objects matching criteria: {len(eligible_indices)}")
+    
+    # Input count to constrain
+    print(f"There are {len(eligible_indices)} objects available.")
+    while True:
+        count = int(input("Number of objects to constrain: "))
+        if 0 < count <= len(eligible_indices):
+            break
+        print(f"Please enter a number between 1 and {len(eligible_indices)}.")
 
-def add_constraints(gdf):
-    # 1. בחירת סוג האילוץ
-    print("\n--- Select Constraint ---")
-    print("[1] Urgent Download\n[2] Elevation Angle\n[3] View Azimuth\n[4] Hour Range In Day\n[5] Resolution")
-    mode = input("Choice: ").strip()
+    # Sampling
+    target_indices = rng.choice(eligible_indices, size=count, replace=False)
     
-    # מיפוי שמות לוגיים לשם התיקייה
-    logic_names = {'1': 'urgent_dl', '2': 'elev_angle', '3': 'view_az', '4': 'hour_range', '5': 'res'}
-    logic_name = logic_names.get(mode, 'unknown')
-    
-    # 2. בחירת מצב
-    print("\n--- Select Mode ---")
-    print("[1] Random\n[2] Deterministic")
-    sampling_mode = input("Choice: ").strip()
-    is_deterministic = (sampling_mode == '2')
-    
-    # 3. בחירת כמות
-    count_input = input("Number of objects (default 10): ").strip()
-    count = int(count_input) if count_input else 10
-    
-    # אתחול הגנרטור
-    rng = np.random.default_rng(seed=42) if is_deterministic else np.random.default_rng()
-    
-    # בחירת אובייקטים
-    n = len(gdf)
-    target_indices = rng.choice(n, size=min(count, n), replace=False)
-    
-    # עדכון הנתונים ב-GeoDataFrame (עכשיו זה יתבצע!)
-    for idx in target_indices:
-        if mode == '1': 
-            gdf.loc[idx, 'urgent_dl'] = 1
-        elif mode == '2':
-            val = input(f"Enter min elevation for target {idx}: ")
-            gdf.loc[idx, 'el_min'] = val
-        elif mode == '3':
-            gdf.loc[idx, 'az_min'] = 0
-            gdf.loc[idx, 'az_max'] = 360
-        # הוסף כאן את שאר המקרים...
+    # Initialize new columns if missing
+    new_cols = {
+        'urgent_dl': False, 'el_from': np.nan, 'el_to': np.nan, 
+        'az_from': np.nan, 'az_to': np.nan, 'hour_range': None, 
+        'resolution': np.nan
+    }
+    for col, default in new_cols.items():
+        if col not in gdf.columns:
+            gdf[col] = default
 
-    # ה-return מגיע בסוף, אחרי שהלולאה סיימה לעדכן את ה-gdf
-    return gdf, logic_name
+    # Apply constraints based on mode
+    if mode == '1':
+        gdf.loc[target_indices, 'urgent_dl'] = True
+    elif mode == '2':
+        gdf.loc[target_indices, 'el_from'] = float(input("Enter elevation from... (0-90): "))
+        gdf.loc[target_indices, 'el_to'] = float(input("Enter elevation to... (0-90): "))
+    elif mode == '3':
+        gdf.loc[target_indices, 'az_from'] = float(input("Enter azimuth from... (0-359): "))
+        gdf.loc[target_indices, 'az_to'] = float(input("Enter azimuth to... (0-359): "))
+    elif mode == '4':
+        gdf.loc[target_indices, 'hour_range'] = input("Enter hour range (hh:mm-hh:mm): ")
+    elif mode == '5':
+        gdf.loc[target_indices, 'resolution'] = float(input("Enter resolution: "))
+        
+    return gdf
 
 def main():
     shp_path = OUTPUT_TARGETS / 'prioritized_targets.shp'
     gdf = load_shapefile(shp_path)
     if gdf is None: return
 
-    # נשמור רשימה של שמות האילוצים כדי לבנות את שם התיקייה בסוף
     applied_logic = []
-
-    while True:
-        print("\nAvailable Constraints:")
-        print("[1] Urgent Download\n[2] Elevation Angle\n[3] View Azimuth\n[4] Hour Range In Day\n[5] Resolution")
-        
-        mode = input("\nSelect Constraint mode [1-5] (or 'q' to finish): ").strip()
-        if mode.lower() == 'q':
-            break
-            
-        if mode not in ['1', '2', '3', '4', '5']:
-            print("Invalid mode.")
-            continue
-
-        # קריאה לפונקציה שמעדכנת את ה-gdf הקיים
-        gdf, logic_name = add_constraints(gdf, mode)
-        applied_logic.append(logic_name)
-        print(f"Constraint '{logic_name}' added successfully.")
-
-    # ייצוא קבצים רק כאן, אחרי שהלולאה הסתיימה
-    save_final_files(gdf, applied_logic)
-
-def save_final_files(gdf, applied_logic):
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    logic_str = "_".join(applied_logic)
-    target_output_folder = DATA_PROCESSED / f"shuffled_{logic_str}_{timestamp}"
-    target_output_folder.mkdir(parents=True, exist_ok=True)
     
-    new_shp_path = target_output_folder / 'constrained_targets.shp'
-    gdf.to_file(new_shp_path)
-    print(f"\nSuccess! Saved to: {target_output_folder}")
+    while True:
+        print("\nAvailable Constraints:\n[1] Urgent\n[2] Elevation\n[3] Azimuth\n[4] Hour Range\n[5] Resolution")
+        mode = input("Select mode [1-5]: ").strip()
+        
+        is_det = input("Mode [1] Random, [2] Deterministic: ").strip() == '2'
+        rng = np.random.default_rng(seed=42 if is_det else None)
+        
+        gdf = apply_constraint(gdf, mode, rng) 
+        applied_logic.append(f"c{mode}")
+        
+        if input("\nAdd another constraint? (y/n): ").lower() != 'y':
+            break
+
+    # Export results
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_dir = DATA_PROCESSED / f"shuffled_{'_'.join(applied_logic)}_{ts}"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Handle sidecar files and save
+    if (src_prj := shp_path.with_suffix('.prj')).exists():
+        shutil.copy(src_prj, out_dir / 'prioritized_targets.prj')
+    
+    gdf.to_file(out_dir / 'prioritized_targets.shp')
+    print(f"\nSuccess! Saved to: {out_dir}")
 
 if __name__ == "__main__":
     main()
