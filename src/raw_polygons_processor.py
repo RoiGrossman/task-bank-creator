@@ -21,6 +21,13 @@ DATA_EXPORT = BASE_DIR / "1-raw_OSM_exports"
 OUTPUT_DIR = BASE_DIR / "2-data" / "processed" / "output_targets"
 BOUNDARY_PATH = BASE_DIR / "2-data" / "raw" / "AOI.kml"
 
+# Final Values
+SCAN_AZIMUTH_MIN = 'null'
+SCAN_AZIMUTH_MAX = 'null'
+LENGTH_BEFORE_CENTER = 6
+LENGTH_AFTER_CENTER = 6
+
+
 def load_and_filter_geometry(input_path, log_lines):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     log_lines.append(f"[{timestamp}] Loading raw data from '{input_path}'...")
@@ -130,7 +137,11 @@ def main():
     
     gdf = apply_priority_by_mode(gdf, dist_mode, min_p, max_p, log_lines, is_deterministic)
     gdf['id'] = [str(uuid.uuid4()) for _ in range(len(gdf))]
-    gdf = gdf[['id', 'priority', 'geometry']]
+    gdf['scanAzMin'] = SCAN_AZIMUTH_MIN
+    gdf['scanAzMax'] = SCAN_AZIMUTH_MAX
+    gdf['LengthBeforeCenter'] = LENGTH_BEFORE_CENTER
+    gdf['LengthAfterCenter'] = LENGTH_AFTER_CENTER
+    gdf = gdf[['id', 'priority', 'geometry', 'scanAzMin', 'scanAzMax', 'LengthBeforeCenter', 'LengthAfterCenter']]
     
     output_shp = OUTPUT_DIR / 'prioritized_targets.shp'
     gdf.to_file(str(output_shp))
