@@ -9,6 +9,9 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR))
 
+# Import from local package
+from xml_exporter import export_to_xml
+
 DATA_PROCESSED = BASE_DIR / "2-data" / "processed"
 OUTPUT_TARGETS = DATA_PROCESSED / "output_targets"
 
@@ -24,7 +27,7 @@ def apply_constraint(gdf, mode, rng):
     eligible_indices = gdf.index.tolist()
     
     # Optional selective filtering based on existing parameters
-    if input("Apply constraint selectively? (y/n): ").lower() == 'y':
+    if input("Apply constraint based on another constraint? (y/n): ").lower() == 'y':
         print("\nAvailable parameters for filtering:")
         columns = list(gdf.columns)
         for i, col in enumerate(columns):
@@ -58,8 +61,8 @@ def apply_constraint(gdf, mode, rng):
     # Initialize new columns if missing
     new_cols = {
         'urgent_dl': False, 'el_from': np.nan, 'el_to': np.nan, 
-        'az_from': np.nan, 'az_to': np.nan, 'hour_range': None, 
-        'resolution': np.nan
+        'az_from': np.nan, 'az_to': np.nan, 'date_start': None, 'date_end': None,
+        'hour_range': None, 'resolution': np.nan
     }
     for col, default in new_cols.items():
         if col not in gdf.columns:
@@ -75,8 +78,13 @@ def apply_constraint(gdf, mode, rng):
         gdf.loc[target_indices, 'az_from'] = float(input("Enter azimuth from... (0-359): "))
         gdf.loc[target_indices, 'az_to'] = float(input("Enter azimuth to... (0-359): "))
     elif mode == '4':
-        gdf.loc[target_indices, 'hour_range'] = input("Enter hour range (hh:mm-hh:mm): ")
+        start_date = input("Enter start date (YYYY-MM-DDTHH:MM:SS.000): ")
+        end_date = input("Enter end date (YYYY-MM-DDTHH:MM:SS.000): ")
+        gdf.loc[target_indices, 'date_start'] = start_date
+        gdf.loc[target_indices, 'date_end'] = end_date
     elif mode == '5':
+        gdf.loc[target_indices, 'hour_range'] = input("Enter hour range (hh:mm-hh:mm): ")
+    elif mode == '6':
         gdf.loc[target_indices, 'resolution'] = float(input("Enter resolution: "))
         
     return gdf
@@ -89,8 +97,8 @@ def main():
     applied_logic = []
     
     while True:
-        print("\nAvailable Constraints:\n[1] Urgent\n[2] Elevation\n[3] Azimuth\n[4] Hour Range\n[5] Resolution")
-        mode = input("Select mode [1-5]: ").strip()
+        print("\nAvailable Constraints:\n[1] Urgent\n[2] Elevation\n[3] Azimuth\n[4] Relevance Date\n[5] Hour Range\n[6] Resolution")
+        mode = input("Select mode [1-6]: ").strip()
         
         is_det = input("Mode [1] Random, [2] Deterministic: ").strip() == '2'
         rng = np.random.default_rng(seed=42 if is_det else None)
@@ -100,7 +108,12 @@ def main():
         
         if input("\nAdd another constraint? (y/n): ").lower() != 'y':
             break
-
+    
+    # Delete Every Column that holds no value at all 
+    for col in gdf.columns:
+        if col in ['urgent_dl', 'el_from', 'el_to', 'az_from', 'az_to', 'date_start', 'date_end', 'hour_range', 'resolution'] and gdf[col].isna().all():
+            gdf = gdf.drop(columns=[col])
+    
     # Export results
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     out_dir = DATA_PROCESSED / f"shuffled_{'_'.join(applied_logic)}_{ts}"
@@ -111,7 +124,10 @@ def main():
         shutil.copy(src_prj, out_dir / 'prioritized_targets.prj')
     
     gdf.to_file(out_dir / 'prioritized_targets.shp')
-    print(f"\nSuccess! Saved to: {out_dir}")
+    print(f"\nSuccess! .shp Saved to: {out_dir}")
+
+    export_to_xml(gdf, str(out_dir / 'prioritized_targets.xml'))
+    print(f"\nSuccess! .xml Saved to: {out_dir}")
 
 if __name__ == "__main__":
     main()

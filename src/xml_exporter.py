@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 import uuid
+import pandas as pd
 
 # Paths and base directories
 
@@ -52,7 +53,8 @@ def export_to_xml(gdf, output_xml_path):
         ET.SubElement(req, "unPlannedElsewhere").text = "false"
         ET.SubElement(req, "plannedElsewhere").text = "false"
         ET.SubElement(req, "disseminationPriority").text = "7"
-        requirement_res = str(row.get('resolution')) if row.get('resolution') else str("1")
+        resVal = row.get('resolution')
+        requirement_res = str(resVal) if pd.notna(resVal) else "1"
         ET.SubElement(req, "worstAcceptableResolution").text = requirement_res
         ET.SubElement(req, "cloudCoverageForcast").text = "0"
         ET.SubElement(req, "percentUnusableData").text = "20"
@@ -85,9 +87,13 @@ def export_to_xml(gdf, output_xml_path):
         # Time Constraints
         time_cons = ET.SubElement(req, "timeConstraints")
         dates = ET.SubElement(time_cons, "imagingDates")
-        range_el = ET.SubElement(dates, "dateRange")
-        ET.SubElement(range_el, "start").text = "2011-06-05T00:00:00.000"
-        ET.SubElement(range_el, "end").text = "2013-01-01T01:00:00.000"
+        date_range = ET.SubElement(dates, "dateRange")
+        start_date_val = row.get('date_start')
+        end_date_val = row.get('date_end')
+        requirement_start_date = str(start_date_val) if pd.notna(start_date_val) else "2011-06-05T00:00:00.000"
+        requirement_end_date = str(end_date_val) if pd.notna(end_date_val) else "2013-01-01T01:00:00.000"
+        ET.SubElement(date_range, "start").text = requirement_start_date
+        ET.SubElement(date_range, "end").text = requirement_end_date
         ET.SubElement(time_cons, "noImagingTimes")
     
     tree = ET.ElementTree(root)
