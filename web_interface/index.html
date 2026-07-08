@@ -141,8 +141,8 @@
         scanAzimuth: document.getElementById('scanAzimuth').value, // This field is collected but not implemented in xml!
         dateRangeStart: document.getElementById('dateRangeStart').value, // This field is collected but not implemented in xml!
         dateRangeEnd: document.getElementById('dateRangeEnd').value, // This field is collected but not implemented in xml!
-        timeInDayStart: document.getElementById('timeInDayStart').value, // This field is collected but not implemented in xml!
-        timeInDayEnd: document.getElementById('timeInDayEnd').value, // This field is collected but not implemented in xml!
+        timeInDayStart: document.getElementById('timeInDayStart').value || null, // This field is collected but not implemented in xml!
+        timeInDayEnd: document.getElementById('timeInDayEnd').value || null,// This field is collected but not implemented in xml!
         viewAzMin: document.getElementById('viewAzMin').value, // This field is collected but not implemented in xml!
         viewAzMax: document.getElementById('viewAzMax').value, // This field is collected but not implemented in xml!
         satElevMin: document.getElementById('satElevMin').value, // This field is collected but not implemented in xml! 
@@ -181,6 +181,7 @@
             properties: targetData
         }))
     };
+
 
     // Send Payload
     console.log("Starting fetch...");

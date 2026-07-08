@@ -16,8 +16,8 @@ class FeatureProperties(BaseModel):
     scanAzimuth: Optional[str] = None # scanAzimuth is collected but not implemented in xml!
     dateRangeStart: datetime # dateRangeStart is collected but not implemented in xml!
     dateRangeEnd: datetime # dateRangeEnd is collected but not implemented in xml!
-    timeInDayStart: time # timeInDayStart is collected but not implemented in xml!
-    timeInDayEnd: time # timeInDayEnd is collected but not implemented in xml!
+    timeInDayStart: Optional[time] = None # timeInDayStart is collected but not implemented in xml!
+    timeInDayEnd: Optional[time] = None # timeInDayEnd is collected but not implemented in xml!
     viewAzMin: Optional[str] = None # viewAzMin is collected but not implemented in xml!
     viewAzMax: Optional[str] = None # viewAzMax is collected but not implemented in xml!
     satElevMin: Optional[str] = None # satElevMin is collected but not implemented in xml!
