@@ -7,16 +7,17 @@ import geopandas as gpd
 from pathlib import Path
 from src.xml_exporter import export_to_xml
 from datetime import datetime, time
+import os
 
 # Dataset definition
 class FeatureProperties(BaseModel):
     name: str
     priority: str
     resolution: float
-    scanAzMin: float # scanAzimuth is collected but not implemented in xml!
-    scanAzMax: float # scanAzimuth is collected but not implemented in xml!
-    LenBefCntr: Optional[float] = None # scanAzimuth is collected but not implemented in xml!
-    LenAftCntr: Optional[float] = None # scanAzimuth is collected but not implemented in xml!
+    scanAzMin: float # scanAzMin is implemented in non-Strategy .xml only!
+    scanAzMax: float # scanAzMax is implemented in non-Strategy .xml only!
+    LenBefCntr: Optional[float] = None # LenBefCntr is implemented in non-Strategy .xml only!
+    LenAftCntr: Optional[float] = None # LenAftCntr is implemented in non-Strategy .xml only!
     dateRangeStart: datetime # dateRangeStart is collected but not implemented in xml!
     dateRangeEnd: datetime # dateRangeEnd is collected but not implemented in xml!
     timeInDayStart: Optional[time] = None # timeInDayStart is collected but not implemented in xml!
@@ -25,6 +26,8 @@ class FeatureProperties(BaseModel):
     viewAzMax: Optional[float] = None # viewAzMax is collected but not implemented in xml!
     satElevMin: Optional[float] = None # satElevMin is collected but not implemented in xml!
     satElevMax: Optional[float] = None # satElevMax is collected but not implemented in xml!
+
+    xmlFormat: bool = False
 
     # notes: Optional[str] = None  # Optional
     # Add new fields here if needed
@@ -70,7 +73,9 @@ async def generate_xml(payload: GeoJSONPayload):
         data_dict = payload.model_dump()
         gdf = gpd.GeoDataFrame.from_features(data_dict["features"])
         output_path = EXPORT_DIR / "manual_target.xml"
-        export_to_xml(gdf, output_path)
+        is_xml_format = payload.features[0].properties.xmlFormat
+        not_strategy_data = os.environ.get('STRATEGY_XML', 'false') == 'true'
+        export_to_xml(gdf, output_path, not_strategy_data=not is_xml_format)
         
         return FileResponse(
             path=output_path, 

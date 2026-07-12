@@ -4,6 +4,7 @@ import numpy as np
 import datetime
 import sys
 from pathlib import Path
+import os
 
 # Base path setup
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -139,7 +140,8 @@ def main():
     gdf.to_file(out_dir / 'prioritized_targets.shp')
     print(f"\nSuccess! .shp Saved to: {out_dir}")
 
-    export_to_xml(gdf, str(out_dir / 'prioritized_targets.xml'))
+    not_strategy_data = os.environ.get('STRATEGY_XML', 'false') == 'true'
+    export_to_xml(gdf, str(out_dir / 'prioritized_targets.xml'), not_strategy_data=not_strategy_data)
     print(f"\nSuccess! .xml Saved to: {out_dir}")
 
 if __name__ == "__main__":

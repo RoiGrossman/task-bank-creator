@@ -137,10 +137,10 @@ def main():
     
     gdf = apply_priority_by_mode(gdf, dist_mode, min_p, max_p, log_lines, is_deterministic)
     gdf['id'] = [str(uuid.uuid4()) for _ in range(len(gdf))]
-    gdf['scanAzMin'] = SCAN_AZIMUTH_MIN # This field isn't implemented in the .xml!
-    gdf['scanAzMax'] = SCAN_AZIMUTH_MAX # This field isn't implemented in the .xml!
-    gdf['LenBefCntr'] = LENGTH_BEFORE_CENTER # This field isn't implemented in the .xml!
-    gdf['LenAftCntr'] = LENGTH_AFTER_CENTER # This field isn't implemented in the .xml!
+    gdf['scanAzMin'] = SCAN_AZIMUTH_MIN # This field is implemented in non-Strategy .xml only!
+    gdf['scanAzMax'] = SCAN_AZIMUTH_MAX # This field is implemented in non-Strategy .xml only!
+    gdf['LenBefCntr'] = LENGTH_BEFORE_CENTER # This field is implemented in non-Strategy .xml only!
+    gdf['LenAftCntr'] = LENGTH_AFTER_CENTER # This field is implemented in non-Strategy .xml only!
     gdf = gdf[['id', 'priority', 'geometry', 'scanAzMin', 'scanAzMax', 'LenBefCntr', 'LenAftCntr']]
     
     output_shp = OUTPUT_DIR / 'prioritized_targets.shp'
@@ -149,7 +149,8 @@ def main():
     summary_path = OUTPUT_DIR / 'summary.txt'
     save_execution_summary_to_file(gdf, str(output_shp), str(summary_path), log_lines, sample_rows_to_show)
     
-    export_to_xml(gdf, str(OUTPUT_DIR / 'prioritized_targets.xml'))
+    not_strategy_data = os.environ.get('STRATEGY_XML', 'false') == 'true'
+    export_to_xml(gdf, str(OUTPUT_DIR / 'prioritized_targets.xml'), not_strategy_data=not_strategy_data)
 
     print(f"Columns in GDF: {gdf.columns.tolist()}")
     

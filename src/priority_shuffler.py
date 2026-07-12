@@ -125,7 +125,8 @@ def main():
     
     # Save XML
     output_xml = target_output_folder / f'tasks_shuffled_{mode}_{timestamp}.xml'
-    export_to_xml(gdf, str(output_xml))
+    not_strategy_data = os.environ.get('STRATEGY_XML', 'false') == 'true'
+    export_to_xml(gdf, str(output_xml), not_strategy_data=not_strategy_data)
     
     print(f"\nSuccess! Saved to: {target_output_folder}")
 

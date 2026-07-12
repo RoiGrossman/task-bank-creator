@@ -5,9 +5,14 @@ from pathlib import Path
 import uuid
 import pandas as pd
 
+SCAN_AZIMUTH_MIN = 0.0
+SCAN_AZIMUTH_MAX = 359.999
+LENGTH_BEFORE_CENTER = 6.0
+LENGTH_AFTER_CENTER = 6.0
+
 # Paths and base directories
 
-def export_to_xml(gdf, output_xml_path):
+def export_to_xml(gdf, output_xml_path, not_strategy_data = False):
     target_path = Path(output_xml_path)
     target_path.parent.mkdir(parents=True, exist_ok=True)
     
@@ -59,6 +64,19 @@ def export_to_xml(gdf, output_xml_path):
         ET.SubElement(req, "cloudCoverageForcast").text = "0"
         ET.SubElement(req, "percentUnusableData").text = "20"
         ET.SubElement(req, "displayText").text = "No Comments"
+        # --------------------------------------------------------
+        # Advanced parameters (outside Strategy basic schema)
+        # --------------------------------------------------------
+        if not_strategy_data:
+            requirement_scanAzimuthMin = str(row.get('scanAzMin')) if row.get('scanAzMin') else str(SCAN_AZIMUTH_MIN)
+            ET.SubElement(req, "scanAzimuthMin").text = requirement_scanAzimuthMin
+            requirement_scanAzimuthMax = str(row.get('scanAzMax')) if row.get('scanAzMax') else str(SCAN_AZIMUTH_MAX)
+            ET.SubElement(req, "scanAzimuthMax").text = requirement_scanAzimuthMax
+            requirement_lengthBeforeCenterP = str(row.get('LenBefCntr')) if row.get('LenBefCntr') else str(LENGTH_BEFORE_CENTER)
+            ET.SubElement(req, "lengthBeforeCenterP").text = requirement_lengthBeforeCenterP
+            requirement_lengthAfterCenterP = str(row.get('LenAftCntr')) if row.get('LenAftCntr') else str(LENGTH_AFTER_CENTER)
+            ET.SubElement(req, "lengthAfterCenterP").text = requirement_lengthAfterCenterP
+
         
         # Target Image Data
         target_data = ET.SubElement(req, "targetImageData")

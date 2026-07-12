@@ -101,6 +101,9 @@
                     <div><label>Max:</label><br><input type="number" id="satElevMax" step="any"></div>
                 </div>
             </div>
+
+            <label class="switch">
+                <input type="checkbox" id="advancedStrategyToggle"><span class="slider"></span>Export In Strategy Format</label>
             
             <div class="full-width">
                 <button onclick="exportGeoJSON()" style="padding: 10px 20px; cursor: pointer;">Export to XML</button>
@@ -153,10 +156,10 @@
         name: document.getElementById('targetName').value,
         priority: document.getElementById('priority').value,
         resolution: document.getElementById('resolution').value,
-        scanAzMin: document.getElementById('scanAzMin').value, // This field is collected but not implemented in xml!
-        scanAzMax: document.getElementById('scanAzMax').value, // This field is collected but not implemented in xml!
-        LenBefCntr: document.getElementById('LenBefCntr').value, // This field is collected but not implemented in xml!
-        LenAftCntr: document.getElementById('LenAftCntr').value, // This field is collected but not implemented in xml!
+        scanAzMin: document.getElementById('scanAzMin').value, // This field is implemented in non-Strategy .xml only!
+        scanAzMax: document.getElementById('scanAzMax').value, // This field is implemented in non-Strategy .xml only!
+        LenBefCntr: document.getElementById('LenBefCntr').value, // This field is implemented in non-Strategy .xml only!
+        LenAftCntr: document.getElementById('LenAftCntr').value, // This field is implemented in non-Strategy .xml only!
         dateRangeStart: document.getElementById('dateRangeStart').value, // This field is collected but not implemented in xml!
         dateRangeEnd: document.getElementById('dateRangeEnd').value, // This field is collected but not implemented in xml!
         timeInDayStart: document.getElementById('timeInDayStart').value || null, // This field is collected but not implemented in xml!
@@ -164,7 +167,8 @@
         viewAzMin: document.getElementById('viewAzMin').value, // This field is collected but not implemented in xml!
         viewAzMax: document.getElementById('viewAzMax').value, // This field is collected but not implemented in xml!
         satElevMin: document.getElementById('satElevMin').value, // This field is collected but not implemented in xml! 
-        satElevMax: document.getElementById('satElevMax').value // This field is collected but not implemented in xml! 
+        satElevMax: document.getElementById('satElevMax').value, // This field is collected but not implemented in xml! 
+        xmlFormat: document.getElementById('advancedStrategyToggle').checked
  
         // Add new fields here if needed
     };
@@ -192,11 +196,13 @@
     } 
     console.log("Polygon Collected and verified");
 
+    const xmlFormat = document.getElementById('advancedStrategyToggle').checked;
+
     // Construct structure for the server
     const payload = {
         features: geoData.features.map(feature => ({
             ...feature,
-            properties: targetData
+            properties: targetData, xmlFormat: xmlFormat
         }))
     };
 

@@ -1,6 +1,7 @@
 import sys
 import geopandas as gpd
 from pathlib import Path
+import os
 
 # Define base path
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,7 +35,8 @@ def process_shapefile_to_xml(shp_path):
     output_xml = path.with_suffix(".xml")
     
     # Export 
-    export_to_xml(gdf, str(output_xml))
+    not_strategy_data = os.environ.get('STRATEGY_XML', 'false') == 'true'
+    export_to_xml(gdf, str(output_xml), not_strategy_data=not_strategy_data)
     print(f"Process complete! XML saved to: {output_xml}")
 
 def main():
