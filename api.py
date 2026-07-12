@@ -12,16 +12,19 @@ from datetime import datetime, time
 class FeatureProperties(BaseModel):
     name: str
     priority: str
-    resolution: str
-    scanAzimuth: Optional[str] = None # scanAzimuth is collected but not implemented in xml!
+    resolution: float
+    scanAzMin: float # scanAzimuth is collected but not implemented in xml!
+    scanAzMax: float # scanAzimuth is collected but not implemented in xml!
+    LenBefCntr: Optional[float] = None # scanAzimuth is collected but not implemented in xml!
+    LenAftCntr: Optional[float] = None # scanAzimuth is collected but not implemented in xml!
     dateRangeStart: datetime # dateRangeStart is collected but not implemented in xml!
     dateRangeEnd: datetime # dateRangeEnd is collected but not implemented in xml!
     timeInDayStart: Optional[time] = None # timeInDayStart is collected but not implemented in xml!
     timeInDayEnd: Optional[time] = None # timeInDayEnd is collected but not implemented in xml!
-    viewAzMin: Optional[str] = None # viewAzMin is collected but not implemented in xml!
-    viewAzMax: Optional[str] = None # viewAzMax is collected but not implemented in xml!
-    satElevMin: Optional[str] = None # satElevMin is collected but not implemented in xml!
-    satElevMax: Optional[str] = None # satElevMax is collected but not implemented in xml!
+    viewAzMin: Optional[float] = None # viewAzMin is collected but not implemented in xml!
+    viewAzMax: Optional[float] = None # viewAzMax is collected but not implemented in xml!
+    satElevMin: Optional[float] = None # satElevMin is collected but not implemented in xml!
+    satElevMax: Optional[float] = None # satElevMax is collected but not implemented in xml!
 
     # notes: Optional[str] = None  # Optional
     # Add new fields here if needed

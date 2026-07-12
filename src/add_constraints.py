@@ -62,11 +62,14 @@ def apply_constraint(gdf, mode, rng):
     new_cols = {
         'urgent_dl': False, 'el_from': np.nan, 'el_to': np.nan, 
         'az_from': np.nan, 'az_to': np.nan, 'date_start': None, 'date_end': None,
-        'hour_range': None, 'resolution': np.nan
+        'hour_range': None, 'resolution': np.nan, 'scanAzMin': np.nan, 'scanAzMax': np.nan, 
+        'LenBefCntr': np.nan, 'LenAftCntr': np.nan
     }
     for col, default in new_cols.items():
         if col not in gdf.columns:
             gdf[col] = default
+            if col in ['scanAzMin', 'scanAzMax', 'LenBefCntr', 'LenAftCntr', 'el_from', 'el_to', 'az_from', 'az_to', 'resolution']:
+                gdf[col] = gdf[col].astype(float)
 
     # Apply constraints based on mode
     if mode == '1':
@@ -86,6 +89,12 @@ def apply_constraint(gdf, mode, rng):
         gdf.loc[target_indices, 'hour_range'] = input("Enter hour range (hh:mm-hh:mm): ")
     elif mode == '6':
         gdf.loc[target_indices, 'resolution'] = float(input("Enter resolution: "))
+    elif mode == '7':
+        gdf.loc[target_indices, 'scanAzMin'] = float(input("Enter Scan Azimuth Min: "))
+        gdf.loc[target_indices, 'scanAzMax'] = float(input("Enter Scan Azimuth Max: "))
+    elif mode == '8':
+        gdf.loc[target_indices, 'LenBefCntr'] = float(input("Enter Length Before Center: "))
+        gdf.loc[target_indices, 'LenAftCntr'] = float(input("Enter Length After Center: "))
         
     return gdf
 
@@ -97,8 +106,8 @@ def main():
     applied_logic = []
     
     while True:
-        print("\nAvailable Constraints:\n[1] Urgent\n[2] Elevation\n[3] Azimuth\n[4] Relevance Date\n[5] Hour Range\n[6] Resolution")
-        mode = input("Select mode [1-6]: ").strip()
+        print("\nAvailable Constraints:\n[1] Urgent\n[2] Elevation\n[3] Azimuth\n[4] Relevance Date\n[5] Hour Range\n[6] Resolution\n[7] Scan Azimuth\n[8] Center Length")
+        mode = input("Select mode [1-8]: ").strip()
         
         is_det = input("Mode [1] Random, [2] Deterministic: ").strip() == '2'
         rng = np.random.default_rng(seed=42 if is_det else None)
@@ -110,8 +119,12 @@ def main():
             break
     
     # Delete Every Column that holds no value at all 
-    for col in gdf.columns:
-        if col in ['urgent_dl', 'el_from', 'el_to', 'az_from', 'az_to', 'date_start', 'date_end', 'hour_range', 'resolution'] and gdf[col].isna().all():
+    cols_to_check = ['urgent_dl', 'el_from', 'el_to', 'az_from', 'az_to', 'date_start', 
+                 'date_end', 'hour_range', 'resolution', 
+                 'scanAzMin', 'scanAzMax', 'LenBefCntr', 'LenAftCntr']
+
+    for col in cols_to_check:
+        if col in gdf.columns and gdf[col].isna().all():
             gdf = gdf.drop(columns=[col])
     
     # Export results

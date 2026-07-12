@@ -24,7 +24,7 @@ def process_shapefile_to_xml(shp_path):
         print("CRITICAL: File is empty. No XML created.")
         return
         
-    required = ['id', 'priority']
+    required = ['id', 'priority', 'scanAzMin', 'scanAzMax', 'LenBefCntr', 'LenAftCntr'] # Last 4 fields aren't implemented in the .xml!
     missing = [col for col in required if col not in gdf.columns]
     if missing:
         print(f"CRITICAL: Missing columns in file: {missing}")

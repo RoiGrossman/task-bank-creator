@@ -53,7 +53,22 @@
             <div class="field"><label class="required">Name:</label><br><input type="text" id="targetName"></div>
             <div class="field"><label class="required">Priority:</label><br><input type="number" id="priority"></div>
             <div class="field"><label class="required">GSD:</label><br><input type="number" id="resolution" step="any"></div>
-            <div class="field"><label>Scan Azimuth:</label><br><input type="number" id="scanAzimuth" step="any"></div>
+
+            <div class="full-width">
+                <h3>Scan azimuth range<span style="font-size: 0.8em; font-weight: normal;"></span></h3>
+                <div class="form-grid">
+                    <div class="field"><label class="required"></label><label>Min: </label><br><input type="number" id="scanAzMin" step="any"></div>
+                    <div class="field"><label class="required"></label><label>Max: </label><br><input type="number" id="scanAzMax" step="any"></div>
+                </div>
+            </div>
+
+            <div class="full-width">
+                <h3>Scan Length range<span style="font-size: 0.8em; font-weight: normal;"></span></h3>
+                <div class="form-grid">
+                    <div class="field"></label><label>Before CenterP: </label><br><input type="number" id="LenBefCntr" step="any"></div>
+                    <div class="field"></label><label>After CenterP: </label><br><input type="number" id="LenAftCntr" step="any"></div>
+                </div>
+            </div>
 
             <div class="full-width">
                 <h3>Task Date&Time Range <span style="font-size: 0.8em; font-weight: normal;">(UTC)</span></h3>
@@ -96,8 +111,8 @@
     <!-- Tabs -->
     <div id="Tabs" ...>
     <div class="tab-buttons">
-        <button class="tab-btn active" onclick="openTab(event, 'POC')">POC</button>
-        <button class="tab-btn" onclick="openTab(event, 'MVP')">MVP</button>
+        <button class="tab-btn" onclick="openTab(event, 'POC')">POC</button>
+        <button class="tab-btn active" onclick="openTab(event, 'MVP')">MVP</button>
     </div>
 
         <div id="POC" class="tab-content" style="display: block;">
@@ -138,7 +153,10 @@
         name: document.getElementById('targetName').value,
         priority: document.getElementById('priority').value,
         resolution: document.getElementById('resolution').value,
-        scanAzimuth: document.getElementById('scanAzimuth').value, // This field is collected but not implemented in xml!
+        scanAzMin: document.getElementById('scanAzMin').value, // This field is collected but not implemented in xml!
+        scanAzMax: document.getElementById('scanAzMax').value, // This field is collected but not implemented in xml!
+        LenBefCntr: document.getElementById('LenBefCntr').value, // This field is collected but not implemented in xml!
+        LenAftCntr: document.getElementById('LenAftCntr').value, // This field is collected but not implemented in xml!
         dateRangeStart: document.getElementById('dateRangeStart').value, // This field is collected but not implemented in xml!
         dateRangeEnd: document.getElementById('dateRangeEnd').value, // This field is collected but not implemented in xml!
         timeInDayStart: document.getElementById('timeInDayStart').value || null, // This field is collected but not implemented in xml!
@@ -153,7 +171,7 @@
     console.log("Data Collected");
 
     console.log("Verifying Data...");
-    const mandatoryFieldsVerification = ['targetName', 'priority', 'resolution', 'dateRangeStart', 'dateRangeEnd' /*Add new fields here if needed*/]; 
+    const mandatoryFieldsVerification = ['targetName', 'priority', 'resolution','scanAzMin', 'scanAzMax', 'dateRangeStart', 'dateRangeEnd' /*Add new fields here if needed*/]; 
     for (let id of mandatoryFieldsVerification) {
         if (!document.getElementById(id).value) {
             console.log("Error: Field missing - " + id);

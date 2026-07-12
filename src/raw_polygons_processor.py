@@ -22,10 +22,10 @@ OUTPUT_DIR = BASE_DIR / "2-data" / "processed" / "output_targets"
 BOUNDARY_PATH = BASE_DIR / "2-data" / "raw" / "AOI.kml"
 
 # Final Values
-SCAN_AZIMUTH_MIN = 'null'
-SCAN_AZIMUTH_MAX = 'null'
-LENGTH_BEFORE_CENTER = 6
-LENGTH_AFTER_CENTER = 6
+SCAN_AZIMUTH_MIN = 0.0
+SCAN_AZIMUTH_MAX = 359.999
+LENGTH_BEFORE_CENTER = 6.0
+LENGTH_AFTER_CENTER = 6.0
 
 
 def load_and_filter_geometry(input_path, log_lines):
@@ -137,11 +137,11 @@ def main():
     
     gdf = apply_priority_by_mode(gdf, dist_mode, min_p, max_p, log_lines, is_deterministic)
     gdf['id'] = [str(uuid.uuid4()) for _ in range(len(gdf))]
-    gdf['scanAzMin'] = SCAN_AZIMUTH_MIN
-    gdf['scanAzMax'] = SCAN_AZIMUTH_MAX
-    gdf['LengthBeforeCenter'] = LENGTH_BEFORE_CENTER
-    gdf['LengthAfterCenter'] = LENGTH_AFTER_CENTER
-    gdf = gdf[['id', 'priority', 'geometry', 'scanAzMin', 'scanAzMax', 'LengthBeforeCenter', 'LengthAfterCenter']]
+    gdf['scanAzMin'] = SCAN_AZIMUTH_MIN # This field isn't implemented in the .xml!
+    gdf['scanAzMax'] = SCAN_AZIMUTH_MAX # This field isn't implemented in the .xml!
+    gdf['LenBefCntr'] = LENGTH_BEFORE_CENTER # This field isn't implemented in the .xml!
+    gdf['LenAftCntr'] = LENGTH_AFTER_CENTER # This field isn't implemented in the .xml!
+    gdf = gdf[['id', 'priority', 'geometry', 'scanAzMin', 'scanAzMax', 'LenBefCntr', 'LenAftCntr']]
     
     output_shp = OUTPUT_DIR / 'prioritized_targets.shp'
     gdf.to_file(str(output_shp))
