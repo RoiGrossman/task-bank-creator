@@ -16,12 +16,42 @@ from xml_exporter import export_to_xml
 DATA_PROCESSED = BASE_DIR / "2-data" / "processed"
 OUTPUT_TARGETS = DATA_PROCESSED / "output_targets"
 
+# For setting a random value per constraint, this deictionary defines possible values
+PARAM_CONFIG = {
+    'el': {'min': 0, 'max': 90, 'step': 1},
+    'az': {'min': 0, 'max': 359, 'step': 10},
+    'resolution': {'min': 0.8, 'max': 1.8, 'step': 0.1}, # 0.8 As min resolution for Etgar B
+    'scanAz': {'min': 0, 'max': 359, 'step': 10},
+    'Len': {'min': 1000, 'max': 200000, 'step': 1000}
+}
+
+MODE_MAP = {
+    '2': {'cols': ['el_from', 'el_to'], 'param': 'el'},
+    '3': {'cols': ['az_from', 'az_to'], 'param': 'az'},
+    '6': {'cols': ['resolution'], 'param': 'resolution'},
+    '7': {'cols': ['scanAzMin', 'scanAzMax'], 'param': 'scanAz'},
+    '8': {'cols': ['LenBefCntr', 'LenAftCntr'], 'param': 'Len'}
+}
+
+OFFSET_CONFIG = {
+    'el': {'base':20, 'variance':5},       
+    'az': {'base':60, 'variance':30},       
+    'scanAz': {'base':40, 'variance':5},
+    'Len': {'base':0, 'variance':0}    
+}
+
 def load_shapefile(shp_path):
     if not shp_path.exists():
         print(f"Error: Target file not found at {shp_path}")
         return None
     print(f"Loading shapefile from {shp_path}...")
     return gpd.read_file(shp_path)
+
+def get_random_value(param_key, rng):
+    conf = PARAM_CONFIG[param_key]
+    num_steps = int((conf['max'] - conf['min']) / conf['step'])
+    random_step = rng.integers(0, num_steps + 1)
+    return conf['min'] + (random_step * conf['step'])
 
 def apply_constraint(gdf, mode, rng):
     # Determine eligible pool for sampling
@@ -58,7 +88,60 @@ def apply_constraint(gdf, mode, rng):
 
     # Sampling
     target_indices = rng.choice(eligible_indices, size=count, replace=False)
+    choice_type = input("Enter values [M]anually or [R]andomly? ").upper()
+
+    # Apply constraints based on mode
+    if mode in MODE_MAP:
+        config = MODE_MAP[mode]
+        cols = config['cols']
+        param_key = config['param']
+        offset = OFFSET_CONFIG.get(param_key, 0)
+        
+        choice_type = input("Enter values [M]anually or [R]andomly? ").upper()
+        
+        if choice_type == 'R':
+            for idx in target_indices:
+                val_min = get_random_value(param_key, rng)
+                config_offset = OFFSET_CONFIG.get(param_key, {'base': 0, 'variance': 0})
+                base_val = config_offset.get('base', 0)
+                var_val = config_offset.get('variance', 0)
+                dynamic_offset = base_val + rng.integers(-var_val, var_val + 1)
+                val_max = val_min + dynamic_offset
+            
+                if val_max > PARAM_CONFIG[param_key]['max']:
+                    val_max = PARAM_CONFIG[param_key]['max']
+
+                if len(cols) == 2:
+                    gdf.loc[idx, cols] = [val_min, val_max]
+                else:
+                    gdf.loc[idx, cols] = val_min
+
+            print(f"Random values assigned uniquely to each object.")
+        else:
+            manual_vals = {}
+            for col in cols:
+                manual_vals[col] = float(input(f"Enter value for '{col}': "))
+
+    elif mode == '1':
+        gdf.loc[target_indices, 'urgent_dl'] = True
+    elif mode == '4':
+        start_date = input("Enter start date (YYYY-MM-DDTHH:MM:SS.000): ")
+        end_date = input("Enter end date (YYYY-MM-DDTHH:MM:SS.000): ")
+        gdf.loc[target_indices, 'date_start'] = start_date
+        gdf.loc[target_indices, 'date_end'] = end_date
+    elif mode == '5':
+        gdf.loc[target_indices, 'hour_range'] = input("Enter hour range (hh:mm-hh:mm): ")
     
+    return gdf
+
+
+def main():
+    shp_path = OUTPUT_TARGETS / 'prioritized_targets.shp'
+    gdf = load_shapefile(shp_path)
+    if gdf is None: return
+
+    applied_logic = []
+
     # Initialize new columns if missing
     new_cols = {
         'urgent_dl': False, 'el_from': np.nan, 'el_to': np.nan, 
@@ -71,43 +154,9 @@ def apply_constraint(gdf, mode, rng):
             gdf[col] = default
             if col in ['scanAzMin', 'scanAzMax', 'LenBefCntr', 'LenAftCntr', 'el_from', 'el_to', 'az_from', 'az_to', 'resolution']:
                 gdf[col] = gdf[col].astype(float)
-
-    # Apply constraints based on mode
-    if mode == '1':
-        gdf.loc[target_indices, 'urgent_dl'] = True
-    elif mode == '2':
-        gdf.loc[target_indices, 'el_from'] = float(input("Enter elevation from... (0-90): "))
-        gdf.loc[target_indices, 'el_to'] = float(input("Enter elevation to... (0-90): "))
-    elif mode == '3':
-        gdf.loc[target_indices, 'az_from'] = float(input("Enter azimuth from... (0-359): "))
-        gdf.loc[target_indices, 'az_to'] = float(input("Enter azimuth to... (0-359): "))
-    elif mode == '4':
-        start_date = input("Enter start date (YYYY-MM-DDTHH:MM:SS.000): ")
-        end_date = input("Enter end date (YYYY-MM-DDTHH:MM:SS.000): ")
-        gdf.loc[target_indices, 'date_start'] = start_date
-        gdf.loc[target_indices, 'date_end'] = end_date
-    elif mode == '5':
-        gdf.loc[target_indices, 'hour_range'] = input("Enter hour range (hh:mm-hh:mm): ")
-    elif mode == '6':
-        gdf.loc[target_indices, 'resolution'] = float(input("Enter resolution: "))
-    elif mode == '7':
-        gdf.loc[target_indices, 'scanAzMin'] = float(input("Enter Scan Azimuth Min: "))
-        gdf.loc[target_indices, 'scanAzMax'] = float(input("Enter Scan Azimuth Max: "))
-    elif mode == '8':
-        gdf.loc[target_indices, 'LenBefCntr'] = float(input("Enter Length Before Center: "))
-        gdf.loc[target_indices, 'LenAftCntr'] = float(input("Enter Length After Center: "))
-        
-    return gdf
-
-def main():
-    shp_path = OUTPUT_TARGETS / 'prioritized_targets.shp'
-    gdf = load_shapefile(shp_path)
-    if gdf is None: return
-
-    applied_logic = []
     
     while True:
-        print("\nAvailable Constraints:\n[1] Urgent\n[2] Elevation\n[3] Azimuth\n[4] Relevance Date\n[5] Hour Range\n[6] Resolution\n[7] Scan Azimuth\n[8] Center Length")
+        print("\nAvailable Constraints:\n[1] Urgent\n[2] Elevation\n[3] Azimuth\n[4] Relevance Date\n[5] Hour Range\n[6] Resolution\n[7] Scan Azimuth\n[8] Scan Length")
         mode = input("Select mode [1-8]: ").strip()
         
         is_det = input("Mode [1] Random, [2] Deterministic: ").strip() == '2'

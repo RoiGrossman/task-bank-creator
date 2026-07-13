@@ -23,9 +23,9 @@ BOUNDARY_PATH = BASE_DIR / "2-data" / "raw" / "AOI.kml"
 
 # Final Values
 SCAN_AZIMUTH_MIN = 0.0
-SCAN_AZIMUTH_MAX = 359.999
-LENGTH_BEFORE_CENTER = 6.0
-LENGTH_AFTER_CENTER = 6.0
+SCAN_AZIMUTH_MAX = 359.999999
+LENGTH_BEFORE_CENTER = 6000
+LENGTH_AFTER_CENTER = 6000
 
 
 def load_and_filter_geometry(input_path, log_lines):
