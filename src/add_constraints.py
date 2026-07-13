@@ -20,7 +20,7 @@ OUTPUT_TARGETS = DATA_PROCESSED / "output_targets"
 PARAM_CONFIG = {
     'el': {'min': 0, 'max': 90, 'step': 1},
     'az': {'min': 0, 'max': 359, 'step': 10},
-    'resolution': {'min': 0.8, 'max': 1.8, 'step': 0.1}, # 0.8 As min resolution for Etgar B
+    'resolution': {'min': 0.8, 'max': 1.5, 'step': 0.1}, # 0.8 As min resolution for Etgar B
     'scanAz': {'min': 0, 'max': 359, 'step': 10},
     'Len': {'min': 1000, 'max': 200000, 'step': 1000}
 }
@@ -88,23 +88,22 @@ def apply_constraint(gdf, mode, rng):
 
     # Sampling
     target_indices = rng.choice(eligible_indices, size=count, replace=False)
-    choice_type = input("Enter values [M]anually or [R]andomly? ").upper()
 
     # Apply constraints based on mode
     if mode in MODE_MAP:
         config = MODE_MAP[mode]
         cols = config['cols']
         param_key = config['param']
-        offset = OFFSET_CONFIG.get(param_key, 0)
         
         choice_type = input("Enter values [M]anually or [R]andomly? ").upper()
         
         if choice_type == 'R':
             for idx in target_indices:
-                val_min = get_random_value(param_key, rng)
+                val_min = round(get_random_value(param_key, rng), 1)
                 config_offset = OFFSET_CONFIG.get(param_key, {'base': 0, 'variance': 0})
                 base_val = config_offset.get('base', 0)
                 var_val = config_offset.get('variance', 0)
+                
                 dynamic_offset = base_val + rng.integers(-var_val, var_val + 1)
                 val_max = val_min + dynamic_offset
             
@@ -115,12 +114,12 @@ def apply_constraint(gdf, mode, rng):
                     gdf.loc[idx, cols] = [val_min, val_max]
                 else:
                     gdf.loc[idx, cols] = val_min
-
-            print(f"Random values assigned uniquely to each object.")
+            print(f"Random values assigned uniquely.")
         else:
-            manual_vals = {}
             for col in cols:
-                manual_vals[col] = float(input(f"Enter value for '{col}': "))
+                val = float(input(f"Enter value for '{col}': "))
+                gdf.loc[target_indices, col] = val
+            print(f"Manual values assigned.")
 
     elif mode == '1':
         gdf.loc[target_indices, 'urgent_dl'] = True
