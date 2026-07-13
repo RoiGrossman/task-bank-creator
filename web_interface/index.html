@@ -63,7 +63,7 @@
             </div>
 
             <div class="full-width">
-                <h3>Scan Length range<span style="font-size: 0.8em; font-weight: normal;"></span></h3>
+                <h3>Scan Length range <span style="font-size: 0.8em; font-weight: normal;">(in Meters)</span></h3>
                 <div class="form-grid">
                     <div class="field"></label><label>Before CenterP: </label><br><input type="number" id="LenBefCntr" step="any"></div>
                     <div class="field"></label><label>After CenterP: </label><br><input type="number" id="LenAftCntr" step="any"></div>
@@ -156,10 +156,10 @@
         name: document.getElementById('targetName').value,
         priority: document.getElementById('priority').value,
         resolution: document.getElementById('resolution').value,
-        scanAzMin: document.getElementById('scanAzMin').value, // This field is implemented in non-Strategy .xml only!
-        scanAzMax: document.getElementById('scanAzMax').value, // This field is implemented in non-Strategy .xml only!
-        LenBefCntr: document.getElementById('LenBefCntr').value, // This field is implemented in non-Strategy .xml only!
-        LenAftCntr: document.getElementById('LenAftCntr').value, // This field is implemented in non-Strategy .xml only!
+        scanAzMin: document.getElementById('scanAzMin').value, // Implemented in non-Strategy .xml
+        scanAzMax: document.getElementById('scanAzMax').value, // Implemented in non-Strategy .xml
+        LenBefCntr: document.getElementById('LenBefCntr').value, // Implemented in non-Strategy .xml
+        LenAftCntr: document.getElementById('LenAftCntr').value, // Implemented in non-Strategy .xml
         dateRangeStart: document.getElementById('dateRangeStart').value, // This field is collected but not implemented in xml!
         dateRangeEnd: document.getElementById('dateRangeEnd').value, // This field is collected but not implemented in xml!
         timeInDayStart: document.getElementById('timeInDayStart').value || null, // This field is collected but not implemented in xml!
