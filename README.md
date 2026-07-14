@@ -18,10 +18,23 @@ TABLE OF CONTENTS:
 
 	- Install and run
 
+	- important notes
 
 
 2. Workflow Overview
+	- Data extractions
 
+	- Initial manipulations of the GeoJSON
+
+	- Reorganize priorities by predefined logic sets
+
+	- Manually prioritizing tasks with QGIS (if needed)
+
+	- Visualization & Verification (if needed)
+
+	- Manually make a single constrained task
+
+	- Add constraints to a target bank
 
 ────────────────────────────────────────────────────────────────
 
@@ -107,16 +120,28 @@ Task_bank_creator
 
 
 ────────────────────────────────────────────────────────────────
+# important notes
 
-
-
+(Important note! in our priority semantics 'the lower the better' -> 1 is the most important ptiority)
+(
+	Important note! the scripts will ask you if you want to export as Strategy xml,
+	if you choose 'yes', the scema will integrate into Strategy as a target bank, but will only include a few constraint fields
+		name
+		id
+		priority
+		resolution
+		date range
+	those constraints will NOT be included
+		scan azimuth
+		scan length
+		SAT azimuth
+		elevation
+		time in day
+)
 ────────────────────────────────────────────────────────────────
 
-
-
 **Workflow Overview**
-
-----------------------------------
+\----------------------------------
 
 Data Extraction (Overpass Turbo)
 
@@ -174,19 +199,13 @@ out geom;
 
 (note: use 'Task_bank_creator\1-raw_OSM_exports' to save old exports that may be useful in the future)
 
-
-
-----------------------------------
+\----------------------------------
 
 
 
-----------------------------------
+\----------------------------------
 
-Initial manipulation of 'export.GeoJson'
-
-(important note! in our priority semantics 'the lower the better' -> 1 is the most important ptiority)
-
-
+Initial manipulation of 'export.GeoJson' (raw_polygons_processor.py)
 
 	1. Run main.py and choose '1. Process Raw Polygons'
 	2. The script will filter out lines and dots, remove exact duplicate geometries
@@ -209,7 +228,7 @@ Initial manipulation of 'export.GeoJson'
 
 \----------------------------------
 
-Reorganize priorities of prioritized_targets
+Reorganize priorities of prioritized_targets (priority_shuffler.py)
 
 1. Run main.py and choose '2. **priority\_shuffler.py**'
 2. The script will use the current shape files in output\_targets
@@ -221,11 +240,11 @@ Reorganize priorities of prioritized_targets
    4. Make cluster targets more important (important note! **THIS FUNCTION DOES'NT WORK**! I do this manually with QGIS, good luck)
    5. The script will open a new folder under 'Task_bank_creator\2-data\processed' and paste the new\&updated  versions of the shapefiles and SCC xml
 
-----------------------------------
+\----------------------------------
 
 
 
-----------------------------------
+\----------------------------------
 
 Manually prioritizing tasks with QGIS
 
@@ -235,11 +254,11 @@ If you had to manually prioritize using QGIS
 	2. Choose 3. Convert SHP to XML
 	3. The script will ask you where to run, copy the .shp file as path and paste in the terminal, the script export a new SCC formatted xml in 'Task_bank_creator\2-data\processed\output_targets' named 'prioritized_targets'
 
-----------------------------------
+\----------------------------------
 
 
 
-----------------------------------
+\----------------------------------
 
 Visualization & Verification (Mapshaper)
 
@@ -249,30 +268,30 @@ Visualization & Verification (Mapshaper)
 	4. Choose a base map from the top-right corner if it is more comfortable
 	5. To inspect polygon priorities hover over the mouse button in the top right corner (under the home,+,-), then click 'inspect features'
 
-----------------------------------
+\----------------------------------
 
 
 
-----------------------------------
+\----------------------------------
 
-Manually make a constrained task
+Manually make a single constrained task (index.html + api.py)
 
 	1. Open terminal in the project directory (Task_bank_creator)
 	2. Run this command: Task_bank_creator>uvicorn api:app --reload
-	3. Open index.html
+	3. Open index.html (http://127.0.0.1:*port number*)
 	4. Set your desired polygon and add your constraints
 	5. Hit 'Export to XML'
 	6. The xml will be saved to your local 'Downloads' folder, as well as in Task_bank_creator\2-data\processed\xml_ready_taskfiles\manual_exports
 
-(important note! **Most of the data fields are currently not implemented into the .xml**!)
+(important note! **Most of the data fields are currently only implemented into the a non-Strategy schema of the .xml**!)
 
-----------------------------------
+\----------------------------------
 
 
 
-----------------------------------
+\----------------------------------
 
-Add constraints to a target bank
+Add constraints to a target bank (add_constraints.py)
 
 	1. Run through Main.py
 	2. The script imports Task_bank_creator\2-data\processed\output_targets as it's base input
