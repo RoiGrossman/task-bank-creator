@@ -89,16 +89,16 @@
             <div class="full-width">
                 <h3>View Azimuth Range <span style="font-size: 0.8em; font-weight: normal;">(Clockwise)</span></h3>
                 <div class="range-group">
-                    <div><label>Min:</label><br><input type="number" id="viewAzMin" step="any"></div>
-                    <div><label>Max:</label><br><input type="number" id="viewAzMax" step="any"></div>
+                    <div><label>Min:</label><br><input type="number" id="minViewAz" step="any"></div>
+                    <div><label>Max:</label><br><input type="number" id="maxViewAz" step="any"></div>
                 </div>
             </div>
 
             <div class="full-width">
                 <h3>Sat Elevation Range</h3>
                 <div class="range-group">
-                    <div><label>Min:</label><br><input type="number" id="satElevMin" step="any"></div>
-                    <div><label>Max:</label><br><input type="number" id="satElevMax" step="any"></div>
+                    <div><label>Min:</label><br><input type="number" id="minElev" step="any"></div>
+                    <div><label>Max:</label><br><input type="number" id="maxElev" step="any"></div>
                 </div>
             </div>
 
@@ -164,10 +164,10 @@
         dateRangeEnd: document.getElementById('dateRangeEnd').value, // This field is collected but not implemented in xml!
         timeInDayStart: document.getElementById('timeInDayStart').value || null, // This field is collected but not implemented in xml!
         timeInDayEnd: document.getElementById('timeInDayEnd').value || null,// This field is collected but not implemented in xml!
-        viewAzMin: document.getElementById('viewAzMin').value, // This field is collected but not implemented in xml!
-        viewAzMax: document.getElementById('viewAzMax').value, // This field is collected but not implemented in xml!
-        satElevMin: document.getElementById('satElevMin').value, // This field is collected but not implemented in xml! 
-        satElevMax: document.getElementById('satElevMax').value, // This field is collected but not implemented in xml! 
+        minViewAz: document.getElementById('minViewAz').value, // This field is collected but not implemented in xml!
+        maxViewAz: document.getElementById('maxViewAz').value, // This field is collected but not implemented in xml!
+        minElev: document.getElementById('minElev').value, // This field is collected but not implemented in xml! 
+        maxElev: document.getElementById('maxElev').value, // This field is collected but not implemented in xml! 
         xmlFormat: document.getElementById('advancedStrategyToggle').checked
  
         // Add new fields here if needed

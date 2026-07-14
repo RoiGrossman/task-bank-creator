@@ -21,7 +21,7 @@ DATA_EXPORT = BASE_DIR / "1-raw_OSM_exports"
 OUTPUT_DIR = BASE_DIR / "2-data" / "processed" / "output_targets"
 BOUNDARY_PATH = BASE_DIR / "2-data" / "raw" / "AOI.kml"
 
-# Final Values
+# Default Values
 SCAN_AZIMUTH_MIN = 0.0
 SCAN_AZIMUTH_MAX = 359.999999
 LENGTH_BEFORE_CENTER = 6000
@@ -137,11 +137,18 @@ def main():
     
     gdf = apply_priority_by_mode(gdf, dist_mode, min_p, max_p, log_lines, is_deterministic)
     gdf['id'] = [str(uuid.uuid4()) for _ in range(len(gdf))]
-    gdf['scanAzMin'] = SCAN_AZIMUTH_MIN # This field is implemented in non-Strategy .xml only!
-    gdf['scanAzMax'] = SCAN_AZIMUTH_MAX # This field is implemented in non-Strategy .xml only!
-    gdf['LenBefCntr'] = LENGTH_BEFORE_CENTER # This field is implemented in non-Strategy .xml only!
-    gdf['LenAftCntr'] = LENGTH_AFTER_CENTER # This field is implemented in non-Strategy .xml only!
-    gdf = gdf[['id', 'priority', 'geometry', 'scanAzMin', 'scanAzMax', 'LenBefCntr', 'LenAftCntr']]
+    #--------------------------------------------------------
+    # Those fields are implemented in non-Strategy .xml only!
+    gdf['scanAzMin'] = SCAN_AZIMUTH_MIN
+    gdf['scanAzMax'] = SCAN_AZIMUTH_MAX 
+    gdf['LenBefCntr'] = LENGTH_BEFORE_CENTER 
+    gdf['LenAftCntr'] = LENGTH_AFTER_CENTER 
+    gdf['minViewAz'] = np.nan
+    gdf['maxViewAz'] = np.nan
+    gdf['minElev'] = np.nan
+    gdf['maxElev'] = np.nan
+    #--------------------------------------------------------
+    gdf = gdf[['id', 'priority', 'geometry', 'scanAzMin', 'scanAzMax', 'LenBefCntr', 'LenAftCntr', 'minViewAz', 'maxViewAz', 'minElev', 'maxElev']]
     
     output_shp = OUTPUT_DIR / 'prioritized_targets.shp'
     gdf.to_file(str(output_shp))

@@ -121,12 +121,14 @@ def main():
 
     # Save Shapefile
     new_shp_path = target_output_folder / 'prioritized_targets.shp'
-    gdf[['id', 'priority', 'geometry']].to_file(new_shp_path)
+    gdf_to_save = gdf[['id', 'priority', 'geometry', 'scanAzMin', 'scanAzMax', 
+                   'LenBefCntr', 'LenAftCntr', 'minViewAz', 'maxViewAz', 'minElev', 'maxElev']]
+    gdf_to_save.to_file(new_shp_path)
     
     # Save XML
     output_xml = target_output_folder / f'tasks_shuffled_{mode}_{timestamp}.xml'
     not_strategy_data = os.environ.get('STRATEGY_XML', 'false') == 'true'
-    export_to_xml(gdf, str(output_xml), not_strategy_data=not_strategy_data)
+    export_to_xml(gdf_to_save, str(output_xml), not_strategy_data=not_strategy_data)
     
     print(f"\nSuccess! Saved to: {target_output_folder}")
 

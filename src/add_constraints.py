@@ -26,8 +26,8 @@ PARAM_CONFIG = {
 }
 
 MODE_MAP = {
-    '2': {'cols': ['el_from', 'el_to'], 'param': 'el'},
-    '3': {'cols': ['az_from', 'az_to'], 'param': 'az'},
+    '2': {'cols': ['minElev', 'maxElev'], 'param': 'el'},
+    '3': {'cols': ['minViewAz', 'maxViewAz'], 'param': 'az'},
     '6': {'cols': ['resolution'], 'param': 'resolution'},
     '7': {'cols': ['scanAzMin', 'scanAzMax'], 'param': 'scanAz'},
     '8': {'cols': ['LenBefCntr', 'LenAftCntr'], 'param': 'Len'}
@@ -143,15 +143,15 @@ def main():
 
     # Initialize new columns if missing
     new_cols = {
-        'urgent_dl': False, 'el_from': np.nan, 'el_to': np.nan, 
-        'az_from': np.nan, 'az_to': np.nan, 'date_start': None, 'date_end': None,
+        'urgent_dl': False, 'minElev': np.nan, 'maxElev': np.nan, 
+        'minViewAz': np.nan, 'maxViewAz': np.nan, 'date_start': None, 'date_end': None,
         'hour_range': None, 'resolution': np.nan, 'scanAzMin': np.nan, 'scanAzMax': np.nan, 
         'LenBefCntr': np.nan, 'LenAftCntr': np.nan
     }
     for col, default in new_cols.items():
         if col not in gdf.columns:
             gdf[col] = default
-            if col in ['scanAzMin', 'scanAzMax', 'LenBefCntr', 'LenAftCntr', 'el_from', 'el_to', 'az_from', 'az_to', 'resolution']:
+            if col in ['scanAzMin', 'scanAzMax', 'LenBefCntr', 'LenAftCntr', 'minElev', 'maxElev', 'minViewAz', 'maxViewAz', 'resolution']:
                 gdf[col] = gdf[col].astype(float)
     
     while True:
@@ -168,7 +168,7 @@ def main():
             break
     
     # Delete Every Column that holds no value at all 
-    cols_to_check = ['urgent_dl', 'el_from', 'el_to', 'az_from', 'az_to', 'date_start', 
+    cols_to_check = ['urgent_dl', 'minElev', 'maxElev', 'minViewAz', 'maxViewAz', 'date_start', 
                  'date_end', 'hour_range', 'resolution', 
                  'scanAzMin', 'scanAzMax', 'LenBefCntr', 'LenAftCntr']
 

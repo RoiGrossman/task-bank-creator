@@ -5,6 +5,7 @@ from pathlib import Path
 import uuid
 import pandas as pd
 
+# Default values
 SCAN_AZIMUTH_MIN = 0.0
 SCAN_AZIMUTH_MAX = 359.999999
 LENGTH_BEFORE_CENTER = 6000
@@ -76,6 +77,14 @@ def export_to_xml(gdf, output_xml_path, not_strategy_data = False):
             ET.SubElement(req, "lengthBeforeCenterP").text = requirement_lengthBeforeCenterP
             requirement_lengthAfterCenterP = str(row.get('LenAftCntr')) if row.get('LenAftCntr') else str(LENGTH_AFTER_CENTER)
             ET.SubElement(req, "lengthAfterCenterP").text = requirement_lengthAfterCenterP
+            requirement_minViewAz = str(row.get('minViewAz')) if row.get('minViewAz') else str("nan")
+            ET.SubElement(req, "min_azimuth").text = requirement_minViewAz
+            requirement_maxViewAz = str(row.get('maxViewAz')) if row.get('maxViewAz') else str("nan")
+            ET.SubElement(req, "max_azimuth").text = requirement_maxViewAz
+            requirement_minElev = str(row.get('minElev')) if row.get('minElev') else str("nan")
+            ET.SubElement(req, "minElevation").text = requirement_minElev
+            requirement_maxElev = str(row.get('maxElev')) if row.get('maxElev') else str("nan")
+            ET.SubElement(req, "maxElevation").text = requirement_maxElev
 
         
         # Target Image Data

@@ -14,19 +14,21 @@ class FeatureProperties(BaseModel):
     name: str
     priority: str
     resolution: float
-    scanAzMin: float # scanAzMin is implemented in non-Strategy .xml only!
-    scanAzMax: float # scanAzMax is implemented in non-Strategy .xml only!
-    LenBefCntr: Optional[float] = None # LenBefCntr is implemented in non-Strategy .xml only!
-    LenAftCntr: Optional[float] = None # LenAftCntr is implemented in non-Strategy .xml only!
     dateRangeStart: datetime # dateRangeStart is collected but not implemented in xml!
     dateRangeEnd: datetime # dateRangeEnd is collected but not implemented in xml!
     timeInDayStart: Optional[time] = None # timeInDayStart is collected but not implemented in xml!
     timeInDayEnd: Optional[time] = None # timeInDayEnd is collected but not implemented in xml!
-    viewAzMin: Optional[float] = None # viewAzMin is collected but not implemented in xml!
-    viewAzMax: Optional[float] = None # viewAzMax is collected but not implemented in xml!
-    satElevMin: Optional[float] = None # satElevMin is collected but not implemented in xml!
-    satElevMax: Optional[float] = None # satElevMax is collected but not implemented in xml!
-
+    #--------------------------------------------------------
+    # Those fields are implemented in non-Strategy .xml only!
+    scanAzMin: float 
+    scanAzMax: float 
+    LenBefCntr: Optional[float] = None 
+    LenAftCntr: Optional[float] = None 
+    minViewAz: Optional[float] = None 
+    maxViewAz: Optional[float] = None 
+    minElev: Optional[float] = None 
+    maxElev: Optional[float] = None 
+    #--------------------------------------------------------
     xmlFormat: bool = False
 
     # notes: Optional[str] = None  # Optional
