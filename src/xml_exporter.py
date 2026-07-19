@@ -59,6 +59,15 @@ def export_to_xml(gdf, output_xml_path, not_strategy_data = False):
         ET.SubElement(req, "unPlannedElsewhere").text = "false"
         ET.SubElement(req, "plannedElsewhere").text = "false"
         ET.SubElement(req, "disseminationPriority").text = "7"
+        scanAzimuthRange = ET.SubElement(req, "scanAzimuthRange")
+        ET.SubElement(scanAzimuthRange, "minimum").text = str(row.get('scanAzMin')) if pd.notna(row.get('scanAzMin')) else str(SCAN_AZIMUTH_MIN)
+        ET.SubElement(scanAzimuthRange, "maximum").text = str(row.get('scanAzMax')) if pd.notna(row.get('scanAzMax')) else str(SCAN_AZIMUTH_MAX)
+        viewingAzimuthRange = ET.SubElement(req, "viewingAzimuthRange")
+        ET.SubElement(viewingAzimuthRange, "minimum").text = str(row.get('minViewAz')) if pd.notna(row.get('minViewAz')) else str(SCAN_AZIMUTH_MIN)
+        ET.SubElement(viewingAzimuthRange, "maximum").text = str(row.get('maxViewAz')) if pd.notna(row.get('maxViewAz')) else str(SCAN_AZIMUTH_MAX)
+        viewingElevationRange = ET.SubElement(req, "viewingElevationRange")
+        ET.SubElement(viewingElevationRange, "minimum").text = str(row.get('minElev')) if pd.notna(row.get('minElev')) else str(SCAN_AZIMUTH_MIN)
+        ET.SubElement(viewingElevationRange, "maximum").text = str(row.get('maxElev')) if pd.notna(row.get('maxElev')) else str(SCAN_AZIMUTH_MAX)
         resVal = row.get('resolution')
         requirement_res = str(resVal) if pd.notna(resVal) else "1"
         ET.SubElement(req, "worstAcceptableResolution").text = requirement_res
@@ -69,23 +78,10 @@ def export_to_xml(gdf, output_xml_path, not_strategy_data = False):
         # Advanced parameters (outside Strategy basic schema)
         # --------------------------------------------------------
         if not_strategy_data:
-            requirement_scanAzimuthMin = str(row.get('scanAzMin')) if row.get('scanAzMin') else str(SCAN_AZIMUTH_MIN)
-            ET.SubElement(req, "scanAzimuthMin").text = requirement_scanAzimuthMin
-            requirement_scanAzimuthMax = str(row.get('scanAzMax')) if row.get('scanAzMax') else str(SCAN_AZIMUTH_MAX)
-            ET.SubElement(req, "scanAzimuthMax").text = requirement_scanAzimuthMax
             requirement_lengthBeforeCenterP = str(row.get('LenBefCntr')) if row.get('LenBefCntr') else str(LENGTH_BEFORE_CENTER)
             ET.SubElement(req, "lengthBeforeCenterP").text = requirement_lengthBeforeCenterP
             requirement_lengthAfterCenterP = str(row.get('LenAftCntr')) if row.get('LenAftCntr') else str(LENGTH_AFTER_CENTER)
             ET.SubElement(req, "lengthAfterCenterP").text = requirement_lengthAfterCenterP
-            requirement_minViewAz = str(row.get('minViewAz')) if row.get('minViewAz') else str("nan")
-            ET.SubElement(req, "min_azimuth").text = requirement_minViewAz
-            requirement_maxViewAz = str(row.get('maxViewAz')) if row.get('maxViewAz') else str("nan")
-            ET.SubElement(req, "max_azimuth").text = requirement_maxViewAz
-            requirement_minElev = str(row.get('minElev')) if row.get('minElev') else str("nan")
-            ET.SubElement(req, "minElevation").text = requirement_minElev
-            requirement_maxElev = str(row.get('maxElev')) if row.get('maxElev') else str("nan")
-            ET.SubElement(req, "maxElevation").text = requirement_maxElev
-
         
         # Target Image Data
         target_data = ET.SubElement(req, "targetImageData")

@@ -19,9 +19,9 @@ OUTPUT_TARGETS = DATA_PROCESSED / "output_targets"
 # For setting a random value per constraint, this deictionary defines possible values
 PARAM_CONFIG = {
     'el': {'min': 0, 'max': 90, 'step': 1},
-    'az': {'min': 0, 'max': 359, 'step': 10},
+    'az': {'min': 0, 'max': 359.999999, 'step': 10},
     'resolution': {'min': 0.8, 'max': 1.5, 'step': 0.1}, # 0.8 As min resolution for Etgar B
-    'scanAz': {'min': 0, 'max': 359, 'step': 10},
+    'scanAz': {'min': 0, 'max': 359.999999, 'step': 10},
     'Len': {'min': 1000, 'max': 200000, 'step': 1000}
 }
 
@@ -34,9 +34,9 @@ MODE_MAP = {
 }
 
 OFFSET_CONFIG = {
-    'el': {'base':20, 'variance':5},       
-    'az': {'base':60, 'variance':30},       
-    'scanAz': {'base':40, 'variance':5},
+    'el': {'base':20, 'variance':0},       
+    'az': {'base':60, 'variance':0},       
+    'scanAz': {'base':0, 'variance':0},
     'Len': {'base':0, 'variance':0}    
 }
 
