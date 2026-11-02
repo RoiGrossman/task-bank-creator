@@ -1,6 +1,6 @@
 **TARGET GENERATOR**
 
-Automation scripts to prioritize and manipulate raw GeoJson files into MBT SCC targets XML
+Automation scripts to prioritize and manipulate raw GeoJson files into targets XML
 
 This project is based on Shir Ben Ami's initial efforts
 
@@ -56,9 +56,9 @@ Task_bank_creator
 
 │   └── processed/        # Outputs - Initial output_targets, Advanced manipulation folders, Manually saved xml versions
 
-├── 3-docs/		  # Includes the MBT SCC target xml schema etc.
+├── 3-docs/		  		# Includes the target xml schema etc.
 
-├── old/		  # Manually saved old files
+├── old/		  		# Manually saved old files
 
 ├── src/                  # Scripts
 
@@ -92,6 +92,7 @@ Task_bank_creator
 
 	- Python 3.10+
 	- Installations from requirements.txt
+	- QGIS is recommended for manual edits, tests and verifications
 
 
 
@@ -177,21 +178,13 @@ out body;
 
 out geom;
 
-
-
 	3. click RUN
 
 	(note: If a "Large amount of data" warning appears, click Continue. If the server is busy, wait 10 seconds and try again)
 
-
-
 	4. Once the map populates, click Export in the top menu.
 
-
-
 	5. Under the Data section, select download GeoJSON.
-
-
 
 	6. Save the downloaded file as export.geojson under 'Task_bank_creator\2-data\raw'.
 
@@ -209,18 +202,13 @@ Initial manipulation of 'export.GeoJson' (raw_polygons_processor.py)
 
 	1. Run main.py and choose '1. Process Raw Polygons'
 	2. The script will filter out lines and dots, remove exact duplicate geometries
-	3. The script will ask you what priority range you want
-	4. The script will ask you how many targets you want to keep
-	5. The script will ask you whether when filtering you want a random or deterministic choosing between all available polygons
-	6. The script will ask you and the assign the priority distribution, choose between Normal distribution(bell curve)\\Uniform\\Linear ascending(few important targets, more and more as the priority rises)
-	7. The script will ask you how many lines you want to present in the summary file
-	8. The script will assign every Polygon with a UUID
-	9. The script will save all Polygons to an xml file in the SCC target schema
-	10. The script will overwrite and save all outputs to 'Task_bank_creator\2-data\processed\output_targets'
+	3. The script will ask you what priority range you want and how to distribute them, ask you how many targets to keep, 
+	4. The script will assign every Polygon with a UUID and save all Polygons to an xml file in the SCC target schema
+	5. The script will overwrite and save all outputs to 'Task_bank_creator\2-data\processed\output_targets'
 
     	1. prioritized\_targets.shape\_files (cpg, dbf, prj, shp, shx)
     	2. summary.txt
-    	3. tasks\_baseline.xml
+    	3. prioritized\_targets.xml
 
 \----------------------------------
 
@@ -260,24 +248,12 @@ If you had to manually prioritize using QGIS
 
 \----------------------------------
 
-Visualization & Verification (Mapshaper)
-
-	1. Open [mapshaper](https://mapshaper.org/)
-	2. Drag\&Drop AOI.kml for reference
-	3. Drag\&Drop all shapefiles from 'Task_bank_creator\2-data\processed\\output\_targets'
-	4. Choose a base map from the top-right corner if it is more comfortable
-	5. To inspect polygon priorities hover over the mouse button in the top right corner (under the home,+,-), then click 'inspect features'
-
-\----------------------------------
-
-
-
-\----------------------------------
-
 Manually make a single constrained task (index.html + api.py)
 
 	1. Open terminal in the project directory (Task_bank_creator)
-	2. Run this command: Task_bank_creator>uvicorn api:app --reload
+	2. Run those commands: 
+		.venv\Scripts\activate
+		Task_bank_creator>uvicorn api:app --reload
 	3. Open index.html (http://127.0.0.1:*port number*)
 	4. Set your desired polygon and add your constraints
 	5. Hit 'Export to XML'
@@ -297,6 +273,22 @@ Add constraints to a target bank (add_constraints.py)
 	2. The script imports Task_bank_creator\2-data\processed\output_targets as it's base input
 	3. Choose constraint and how to implement it, you can add more than one constraint and you can add a constraint as a dependency of another constraint
 	4. The output files will be exported to Task_bank_creator\2-data\processed\__New_Directory__
+\----------------------------------
+
+
+
+\----------------------------------
+
+Visualization & Verification (Mapshaper)
+
+	1. Open [mapshaper](https://mapshaper.org/)
+	2. Drag\&Drop AOI.kml for reference
+	3. Drag\&Drop all shapefiles from 'Task_bank_creator\2-data\processed\\output\_targets'
+	4. Choose a base map from the top-right corner if it is more comfortable
+	5. To inspect polygon priorities hover over the mouse button in the top right corner (under the home,+,-), then click 'inspect features'
+
+	Or use QGIS for advanced features
+\----------------------------------
 
 
 

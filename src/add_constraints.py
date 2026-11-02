@@ -21,7 +21,7 @@ PARAM_CONFIG = {
     'el': {'min': 0, 'max': 90, 'step': 1},
     'az': {'min': 0, 'max': 359.999999, 'step': 10},
     'resolution': {'min': 0.8, 'max': 1.5, 'step': 0.1}, # 0.8 As min resolution for Etgar B
-    'scanAz': {'min': 0, 'max': 359.999999, 'step': 10},
+    'scanAz': {'min': 0.000001, 'max': 359.999999, 'step': 10},
     'Len': {'min': 1000, 'max': 200000, 'step': 1000}
 }
 

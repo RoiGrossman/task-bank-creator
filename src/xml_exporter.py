@@ -8,6 +8,8 @@ import pandas as pd
 # Default values
 SCAN_AZIMUTH_MIN = 0.0
 SCAN_AZIMUTH_MAX = 359.999999
+ELEVATION_ANGLE_MIN = 0.0
+ELEVATION_ANGLE_MAX = 90
 LENGTH_BEFORE_CENTER = 6000
 LENGTH_AFTER_CENTER = 6000
 
@@ -66,8 +68,8 @@ def export_to_xml(gdf, output_xml_path, not_strategy_data = False):
         ET.SubElement(viewingAzimuthRange, "minimum").text = str(row.get('minViewAz')) if pd.notna(row.get('minViewAz')) else str(SCAN_AZIMUTH_MIN)
         ET.SubElement(viewingAzimuthRange, "maximum").text = str(row.get('maxViewAz')) if pd.notna(row.get('maxViewAz')) else str(SCAN_AZIMUTH_MAX)
         viewingElevationRange = ET.SubElement(req, "viewingElevationRange")
-        ET.SubElement(viewingElevationRange, "minimum").text = str(row.get('minElev')) if pd.notna(row.get('minElev')) else str(SCAN_AZIMUTH_MIN)
-        ET.SubElement(viewingElevationRange, "maximum").text = str(row.get('maxElev')) if pd.notna(row.get('maxElev')) else str(SCAN_AZIMUTH_MAX)
+        ET.SubElement(viewingElevationRange, "minimum").text = str(row.get('minElev')) if pd.notna(row.get('minElev')) else str(ELEVATION_ANGLE_MIN)
+        ET.SubElement(viewingElevationRange, "maximum").text = str(row.get('maxElev')) if pd.notna(row.get('maxElev')) else str(ELEVATION_ANGLE_MAX)
         resVal = row.get('resolution')
         requirement_res = str(resVal) if pd.notna(resVal) else "1"
         ET.SubElement(req, "worstAcceptableResolution").text = requirement_res

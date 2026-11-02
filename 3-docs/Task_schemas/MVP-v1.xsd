@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://scc/xml/schemas"
+           xmlns="http://scc/xml/schemas"
+           elementFormDefault="qualified">
+
+  <!-- Root Element -->
+  <xs:element name="message">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="iccHeader" type="IccHeaderType"/>
+        <xs:element name="missionRequirementsData" type="MissionRequirementsDataType"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Header Type -->
+  <xs:complexType name="IccHeaderType">
+    <xs:sequence>
+      <xs:element name="messageType" type="xs:string"/>
+      <xs:element name="originator" type="xs:string"/>
+      <xs:element name="originatorAddress" type="xs:string"/>
+      <xs:element name="recipient" type="xs:string"/>
+      <xs:element name="creationTime" type="xs:long"/>
+      <xs:element name="creationTimeString" type="xs:dateTime"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Mission Requirements Data Type -->
+  <xs:complexType name="MissionRequirementsDataType">
+    <xs:sequence>
+      <xs:element name="satellite" type="xs:string"/>
+      <xs:element name="scowId" type="xs:string"/>
+      <xs:element name="planRequirementId" type="xs:string"/>
+      <xs:element name="updatedRequirementList" type="xs:boolean"/>
+      <xs:element name="requirementList" type="RequirementListType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Requirement List Type -->
+  <xs:complexType name="RequirementListType">
+    <xs:sequence>
+      <xs:element name="requirement" type="RequirementType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Single Requirement Type -->
+  <xs:complexType name="RequirementType">
+    <xs:sequence>
+      <xs:element name="palRequirementId" type="xs:string"/>
+      <xs:element name="requirementName" type="xs:string"/>
+      <xs:element name="type" type="xs:string"/>
+      <xs:element name="extraRequirement" type="xs:boolean"/>
+      <xs:element name="deleted" type="xs:boolean"/>
+      <xs:element name="priority" type="xs:integer"/>
+      <xs:element name="unPlannedElsewhere" type="xs:boolean"/>
+      <xs:element name="plannedElsewhere" type="xs:boolean"/>
+      <xs:element name="disseminationPriority" type="xs:integer"/>
+      <xs:element name="scanAzimuthRange" type="MinMaxRangeType"/>
+      <xs:element name="viewingAzimuthRange" type="MinMaxRangeType"/>
+      <xs:element name="viewingElevationRange" type="MinMaxRangeType"/>
+      <xs:element name="worstAcceptableResolution" type="xs:decimal"/>
+      <xs:element name="cloudCoverageForcast" type="xs:integer"/>
+      <xs:element name="percentUnusableData" type="xs:integer"/>
+      <xs:element name="displayText" type="xs:string"/>
+      <xs:element name="lengthBeforeCenterP" type="xs:decimal"/>
+      <xs:element name="lengthAfterCenterP" type="xs:decimal"/>
+      <xs:element name="targetImageData" type="TargetImageDataType"/>
+      <xs:element name="desirability" type="xs:integer"/>
+      <xs:element name="anchor" type="xs:boolean"/>
+      <xs:element name="monoImaging" type="xs:string" minOccurs="0"/>
+      <xs:element name="coverageConstraints" type="CoverageConstraintsType"/>
+      <xs:element name="timeConstraints" type="TimeConstraintsType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Common Min/Max Range Type -->
+  <xs:complexType name="MinMaxRangeType">
+    <xs:sequence>
+      <xs:element name="minimum" type="xs:decimal"/>
+      <xs:element name="maximum" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Target Image Data Type -->
+  <xs:complexType name="TargetImageDataType">
+    <xs:sequence>
+      <xs:element name="targetCenterHeight" type="xs:integer"/>
+      <xs:element name="polygonBoundary" type="PolygonBoundaryType"/>
+      <xs:element name="nominalTargetGroundContrast" type="xs:string" minOccurs="0"/>
+      <xs:element name="niirsNotApplicable" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Polygon Boundary Type -->
+  <xs:complexType name="PolygonBoundaryType">
+    <xs:sequence>
+      <xs:element name="geographicPoint" type="GeographicPointType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Geographic Point Type -->
+  <xs:complexType name="GeographicPointType">
+    <xs:sequence>
+      <xs:element name="long" type="xs:decimal"/>
+      <xs:element name="lat" type="xs:decimal"/>
+      <xs:element name="heightUnknown" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Coverage Constraints Type -->
+  <xs:complexType name="CoverageConstraintsType">
+    <xs:sequence>
+      <xs:element name="oneScan" type="xs:boolean"/>
+      <xs:element name="oneScow" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Time Constraints Type -->
+  <xs:complexType name="TimeConstraintsType">
+    <xs:sequence>
+      <xs:element name="imagingDates" type="ImagingDatesType"/>
+      <xs:element name="noImagingTimes" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Imaging Dates Type -->
+  <xs:complexType name="ImagingDatesType">
+    <xs:sequence>
+      <xs:element name="dateRange" type="DateRangeType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Date Range Type -->
+  <xs:complexType name="DateRangeType">
+    <xs:sequence>
+      <xs:element name="start" type="xs:dateTime"/>
+      <xs:element name="end" type="xs:dateTime"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>
