@@ -70,6 +70,7 @@ def export_to_xml(gdf, output_xml_path, not_strategy_data = False):
         viewingElevationRange = ET.SubElement(req, "viewingElevationRange")
         ET.SubElement(viewingElevationRange, "minimum").text = str(row.get('minElev')) if pd.notna(row.get('minElev')) else str(ELEVATION_ANGLE_MIN)
         ET.SubElement(viewingElevationRange, "maximum").text = str(row.get('maxElev')) if pd.notna(row.get('maxElev')) else str(ELEVATION_ANGLE_MAX)
+        # comment
         resVal = row.get('resolution')
         requirement_res = str(resVal) if pd.notna(resVal) else "1"
         ET.SubElement(req, "worstAcceptableResolution").text = requirement_res

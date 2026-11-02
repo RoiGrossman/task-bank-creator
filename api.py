@@ -30,6 +30,7 @@ class FeatureProperties(BaseModel):
     maxElev: Optional[float] = None 
     #--------------------------------------------------------
     xmlFormat: bool = False
+    #comment
 
     # notes: Optional[str] = None  # Optional
     # Add new fields here if needed
