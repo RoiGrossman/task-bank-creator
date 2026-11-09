@@ -73,9 +73,12 @@ async def generate_xml(payload: GeoJSONPayload):
     print("---------------------------------------------------------------")
 
     try:
+        target_name = payload.features[0].properties.name.replace(' ', '_')
+        dynamic_filename = f"{target_name}.xml"
+
         data_dict = payload.model_dump()
         gdf = gpd.GeoDataFrame.from_features(data_dict["features"])
-        output_path = EXPORT_DIR / "manual_target.xml"
+        output_path = EXPORT_DIR / "dynamic_filename.xml"
         is_xml_format = payload.features[0].properties.xmlFormat
         not_strategy_data = os.environ.get('STRATEGY_XML', 'false') == 'true'
         export_to_xml(gdf, output_path, not_strategy_data=not is_xml_format)
@@ -83,7 +86,7 @@ async def generate_xml(payload: GeoJSONPayload):
         return FileResponse(
             path=output_path, 
             media_type='application/xml', 
-            filename='manual_target.xml'
+            filename='dynamic_filename.xml'
         )
     except Exception as e:
         print(f"Error during export: {e}")

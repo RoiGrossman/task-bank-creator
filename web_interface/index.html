@@ -220,7 +220,8 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'manual_target.xml';
+        const targetName = document.getElementById('targetName').value.replace(/ /g, '_');
+        a.download = targetName ? `${targetName}.xml` : 'target.xml';
         document.body.appendChild(a);
         a.click();
         a.remove();

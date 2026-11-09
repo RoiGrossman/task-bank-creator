@@ -253,7 +253,7 @@ Manually make a single constrained task (index.html + api.py)
 	1. Open terminal in the project directory (Task_bank_creator)
 	2. Run those commands: 
 		.venv\Scripts\activate
-		Task_bank_creator>uvicorn api:app --reload
+		uvicorn api:app --reload
 	3. Open index.html (http://127.0.0.1:*port number*)
 	4. Set your desired polygon and add your constraints
 	5. Hit 'Export to XML'
