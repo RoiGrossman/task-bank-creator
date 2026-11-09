@@ -36,6 +36,8 @@ TABLE OF CONTENTS:
 
 	- Add constraints to a target bank
 
+	- Aggregate task .xml files to a single file
+
 ────────────────────────────────────────────────────────────────
 
 Formal Definitions
@@ -55,6 +57,10 @@ Task_bank_creator
 │   ├── raw/              # Inputs - export.geojson, AOI.kml
 
 │   └── processed/        # Outputs - Initial output_targets, Advanced manipulation folders, Manually saved xml versions
+
+│   └── task_files_aggregator/ # NEW: Aggregator working folders
+│       ├── input/        # Place individual .xml task files here
+│       └── output/       # Aggregated .xml target bank will be saved here
 
 ├── 3-docs/		  		# Includes the target xml schema etc.
 
@@ -289,6 +295,16 @@ Visualization & Verification (Mapshaper)
 
 	Or use QGIS for advanced features
 \----------------------------------
+
+----------------------------------
+Aggregate Multiple XML Task Files (xml_aggregator.py)
+
+    1. Place all your individual .xml task files (e.g. from the web interface) into 'Task_bank_creator\2-data\task_files_aggregator\input'
+    2. Run main.py and choose '5. Aggregate Task Files (Merge XMLs)'
+    3. The script will extract all <requirement> objects and merge them into a single, valid target bank XML.
+    4. If a file is malformed, the script will abort and tell you exactly which file and line caused the error.
+    5. The final merged XML will be saved with a timestamp to 'Task_bank_creator\2-data\task_files_aggregator\output'
+----------------------------------
 
 
 

@@ -5,7 +5,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent / "0-project-root"
 sys.path.append(str(BASE_DIR))
 
-from src import raw_polygons_processor, priority_shuffler, raw_shp_to_xml, add_constraints
+from src import raw_polygons_processor, priority_shuffler, raw_shp_to_xml, add_constraints, xml_aggregator
 
 def main():
     print("\n--- Target Generator Main Menu ---")
@@ -13,8 +13,9 @@ def main():
     print("2. Shuffle Priorities")
     print("3. Convert SHP to XML")
     print("4. Add Constraints")
+    print("5. Aggregate Task Files (Merge XMLs)")
     
-    choice = input("\nSelect an option [1-4]: ").strip()
+    choice = input("\nSelect an option [1-5]: ").strip()
 
     not_strategy_data = input("Export as Strategy .xml? (y/n) [default: n]: ").lower()
     os.environ['STRATEGY_XML'] = 'false' if not_strategy_data == 'y' else 'true'
@@ -31,6 +32,9 @@ def main():
     elif choice == '4':
         print("Running Add Constraints...")
         add_constraints.main()
+    elif choice == '5':
+        print("Running XML Aggregator...")
+        xml_aggregator.main()
     else:
         print("Invalid selection.")
 
